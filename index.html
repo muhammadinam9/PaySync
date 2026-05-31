@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PaySync — Live Payment Schedule</title>
+<title>PaySync — Live Schedule</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -12,54 +12,42 @@
 :root{--bg:#f5f4f0;--bg2:#fff;--bg3:#eeecea;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--text:#1a1a24;--text2:#3a3a4a;--text3:#5a5a6e;--muh:#3b2fd0;--wife:#0a7a4a;--red:#b52a2a;--green:#0a7a4a;--r:13px;--rs:8px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;padding-bottom:30px;}
-
 .header{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:14px 16px 0;position:sticky;top:0;z-index:50;}
 .hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .logo{font-size:17px;font-weight:600;color:var(--text);}.logo span{color:var(--muh);}
 .sub{font-size:11px;color:var(--text3);margin-top:2px;}
 .hbtns{display:flex;gap:8px;align-items:center;}
-.cbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--muh);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
-.rbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid rgba(10,122,74,0.3);background:rgba(10,122,74,0.06);color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:4px;}
-.rbtn i{font-size:14px;}
+.cbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--muh);cursor:pointer;font-family:'DM Sans',sans-serif;}
+.rbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid rgba(10,122,74,0.3);background:rgba(10,122,74,0.06);color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
+.rbtn i{font-size:14px;transition:transform .3s;}
 .rbtn.spinning i{animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
 .filters{display:flex;overflow-x:auto;scrollbar-width:none;border-top:0.5px solid var(--border);}
 .filters::-webkit-scrollbar{display:none;}
 .ftab{flex:none;padding:10px 16px;font-size:12px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;white-space:nowrap;}
 .ftab.active{color:var(--muh);border-bottom-color:var(--muh);}
-
 .jumpbar{display:flex;overflow-x:auto;scrollbar-width:none;gap:6px;padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);}
 .jumpbar::-webkit-scrollbar{display:none;}
-.jbtn{flex:none;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s;}
+.jbtn{flex:none;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
 .jbtn.active{background:var(--muh);color:#fff;border-color:var(--muh);}
-
-.notice{background:rgba(59,47,208,0.05);border-bottom:0.5px solid rgba(59,47,208,0.15);padding:10px 16px;font-size:12px;color:var(--muh);line-height:1.6;display:flex;align-items:center;gap:8px;}
-.notice .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
+.notice{padding:10px 16px;font-size:12px;line-height:1.6;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;gap:8px;}
+.notice.live{background:rgba(10,122,74,0.05);color:var(--green);}
+.notice.cached{background:rgba(138,85,0,0.05);color:#8a5500;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;margin-top:3px;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);}
 .sc{background:var(--bg3);border-radius:var(--rs);padding:10px 12px;}
 .sc .sl{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
 .sc .sv{font-size:14px;font-weight:600;font-family:'DM Mono',monospace;}
-
 .legend{display:flex;gap:14px;padding:9px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-wrap:wrap;}
 .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
 .ld{width:8px;height:8px;border-radius:50%;}
-
+.lastupdated{font-size:10px;color:var(--text3);padding:4px 16px 0;text-align:right;}
 .feed{padding:12px 16px;}
-
-/* LOADING */
 .loading{text-align:center;padding:60px 20px;color:var(--text3);}
 .loading i{font-size:36px;display:block;margin-bottom:12px;animation:spin 1s linear infinite;color:var(--muh);}
-.loading p{font-size:13px;}
-
-/* ERROR */
-.errmsg{margin:16px;background:rgba(181,42,42,0.05);border:0.5px solid rgba(181,42,42,0.2);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--red);line-height:1.6;}
-
 .mdiv{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:16px 0 8px;display:flex;align-items:center;gap:8px;}
 .mdiv::after{content:'';flex:1;height:0.5px;background:var(--border2);}
-
 .pcheck{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
 .pcheck.sf{border-left:3px solid var(--red);}
 .pcheck.mc{border-left:3px solid var(--muh);}
@@ -76,7 +64,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .pcheck.collapsed .chv{transform:rotate(-90deg);}
 .cbody{padding:0 14px;}
 .pcheck.collapsed .cbody{display:none;}
-
 .nobills{padding:14px 0;font-size:13px;color:var(--text3);font-style:italic;}
 .brow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);}
 .brow:last-of-type{border-bottom:none;}
@@ -85,16 +72,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .bdue{font-size:10px;color:var(--text3);flex-shrink:0;font-family:'DM Mono',monospace;}
 .at{font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:rgba(181,42,42,0.08);color:var(--red);flex-shrink:0;}
 .ba{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;min-width:62px;text-align:right;}
-
 .trow{display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;}
 .tl{font-size:12px;color:var(--text3);}
 .tb{font-family:'DM Mono',monospace;font-size:12px;color:var(--red);}
 .tleft{font-family:'DM Mono',monospace;font-size:17px;font-weight:700;}
 .pos{color:var(--green);}.neg{color:var(--red);}
-
 .avl{margin:0 0 12px;background:rgba(59,47,208,0.05);border:0.5px solid rgba(59,47,208,0.18);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--muh);line-height:1.6;}
 .sfail{margin:0 0 12px;background:rgba(181,42,42,0.05);border:0.5px solid rgba(181,42,42,0.2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--red);line-height:1.6;}
-.lastupdated{font-size:10px;color:var(--text3);padding:4px 16px 8px;text-align:right;}
 </style>
 </head>
 <body>
@@ -102,13 +86,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 <div class="header">
   <div class="hrow">
     <div>
-      <div class="logo">Pay<span>Sync</span> — Live Schedule</div>
-      <div class="sub" id="subText">Fetching from Google Sheets...</div>
+      <div class="logo">Pay<span>Sync</span> — Schedule</div>
+      <div class="sub" id="subText">Loading...</div>
     </div>
     <div class="hbtns">
-      <button class="rbtn" id="refreshBtn" onclick="loadData()">
-        <i class="ti ti-refresh" aria-hidden="true"></i>Refresh
-      </button>
+      <button class="rbtn" id="refreshBtn" onclick="loadData()"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
       <button class="cbtn" id="toggleBtn" onclick="toggleAll()">Collapse All</button>
     </div>
   </div>
@@ -119,7 +101,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
-<div class="jumpbar" id="jumpbar">
+<div class="jumpbar">
   <button class="jbtn" data-mo="June 2026">Jun 26</button>
   <button class="jbtn" data-mo="July 2026">Jul 26</button>
   <button class="jbtn" data-mo="August 2026">Aug 26</button>
@@ -132,9 +114,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   <button class="jbtn" data-mo="March 2027">Mar 27</button>
 </div>
 
-<div class="notice">
+<div id="noticeBar" class="notice cached">
   <div class="live-dot"></div>
-  <span><strong>Live data</strong> — pulled from your Google Spreadsheet every time you open or refresh this page. Change a due date in your sheet → hit Refresh → schedule updates instantly.</span>
+  <span id="noticeText">Loading data...</span>
 </div>
 
 <div class="summary">
@@ -142,215 +124,213 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   <div class="sc"><div class="sl">Wife / check</div><div class="sv" style="color:var(--wife);">$2,000</div></div>
   <div class="sc"><div class="sl">Min Bills/mo</div><div class="sv" style="color:var(--red);" id="totalMin">$4,790</div></div>
 </div>
-
 <div class="legend">
   <div class="li"><div class="ld" style="background:var(--muh);"></div>Muhammad</div>
   <div class="li"><div class="ld" style="background:var(--wife);"></div>Wife</div>
   <div class="li"><div class="ld" style="background:var(--red);"></div>High APR</div>
 </div>
-
-<div id="lastupdated" class="lastupdated"></div>
-<div class="feed" id="feed">
-  <div class="loading">
-    <i class="ti ti-loader-2" aria-hidden="true"></i>
-    <p>Loading your bill schedule from Google Sheets...</p>
-  </div>
-</div>
+<div class="lastupdated" id="lastUpdated"></div>
+<div class="feed" id="feed"><div class="loading"><i class="ti ti-loader-2"></i><p>Fetching your bills...</p></div></div>
 
 <script>
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv1yMMmyrTbWbz0fSah10me9ZUucytGjVtEPK125AwJTp-HsZchBojFlakjodi9itRf5ZaDCroBU8x/pub?gid=1655141454&single=true&output=csv';
-// Try multiple CORS proxies in order — if one fails, try the next
-const PROXIES = [
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-];
+// ── CONFIG ──
+const SHEET_ID = '10BHf_je_cT247F6LbTqjctF_QWCE35uVym0wI5Ysqp4';
+const GID      = '1655141454';
 
-// ── EXACT PAYCHECK DATES ──
-const MUH_CHECKS = [
-  '2026-06-15','2026-06-29','2026-07-13','2026-07-27',
-  '2026-08-10','2026-08-24','2026-09-07','2026-09-21',
-  '2026-10-05','2026-10-19','2026-11-02','2026-11-16',
-  '2026-11-30','2026-12-14','2026-12-28','2027-01-11',
-  '2027-01-25','2027-02-08','2027-02-22','2027-03-08','2027-03-22'
-].map(s=>new Date(s+'T12:00:00'));
-
-const WIFE_CHECKS = [
-  '2026-06-05','2026-06-19','2026-07-03','2026-07-17','2026-07-31',
-  '2026-08-14','2026-08-28','2026-09-11','2026-09-25',
-  '2026-10-09','2026-10-23','2026-11-06','2026-11-20',
-  '2026-12-04','2026-12-18','2027-01-01','2027-01-15',
-  '2027-01-29','2027-02-12','2027-02-26','2027-03-12','2027-03-26'
-].map(s=>new Date(s+'T12:00:00'));
-
+// ── PAYCHECK DATES (exact from your spreadsheet) ──
 const ALL_CHECKS = [
-  ...MUH_CHECKS.map(d=>({d, p:'Muhammad', net:3047})),
-  ...WIFE_CHECKS.map(d=>({d, p:'Wife', net:2000}))
+  ...['2026-06-15','2026-06-29','2026-07-13','2026-07-27','2026-08-10','2026-08-24',
+      '2026-09-07','2026-09-21','2026-10-05','2026-10-19','2026-11-02','2026-11-16',
+      '2026-11-30','2026-12-14','2026-12-28','2027-01-11','2027-01-25','2027-02-08',
+      '2027-02-22','2027-03-08','2027-03-22'].map(s=>({d:new Date(s+'T12:00:00'),p:'Muhammad',net:3047})),
+  ...['2026-06-05','2026-06-19','2026-07-03','2026-07-17','2026-07-31','2026-08-14',
+      '2026-08-28','2026-09-11','2026-09-25','2026-10-09','2026-10-23','2026-11-06',
+      '2026-11-20','2026-12-04','2026-12-18','2027-01-01','2027-01-15','2027-01-29',
+      '2027-02-12','2027-02-26','2027-03-12','2027-03-26'].map(s=>({d:new Date(s+'T12:00:00'),p:'Wife',net:2000}))
 ].sort((a,b)=>a.d-b.d);
 
-const HIGH_APR = {'Capital One 1887':28.49,'Chase Freedom':27.49,'Chase Diseny':26.49,'Chase Disney':26.49,'Capital One 4417':24.49,'Wells Fargo':23.49,'Citi Costco':22.74};
-
-const AVALANCHE_TARGETS = [
-  {until:'2026-07-31', target:'Capital One 1887 (28.49%)'},
-  {until:'2026-09-15', target:'Chase Freedom (27.49%)'},
-  {until:'2026-10-20', target:'Chase Disney (26.49%)'},
-  {until:'2026-12-10', target:'Capital One 4417 (24.49%)'},
-  {until:'2027-01-05', target:'Wells Fargo (23.49%)'},
-  {until:'2027-03-31', target:'Citi Costco (22.74%)'},
+// ── STATIC FALLBACK BILLS (snapshot from your sheet) ──
+const STATIC_BILLS = [
+  {n:'Tehmina Life Insurance',  due:'2026-06-16', a:61.00,   apr:0,     h:false},
+  {n:'Parking Cash',            due:'2026-06-25', a:100.00,  apr:0,     h:false},
+  {n:'Citi Bank',               due:'2026-06-27', a:50.00,   apr:0,     h:false},
+  {n:'ComEd',                   due:'2026-06-27', a:113.05,  apr:0,     h:false},
+  {n:'All State Auto Insurance',due:'2026-06-30', a:252.47,  apr:0,     h:false},
+  {n:'Association',             due:'2026-07-01', a:170.00,  apr:0,     h:false},
+  {n:'Donation',                due:'2026-07-01', a:100.00,  apr:0,     h:false},
+  {n:'Auto Loan',               due:'2026-07-01', a:468.61,  apr:2.7,   h:false},
+  {n:'Rent / Mortgage',         due:'2026-07-01', a:1047.46, apr:2.87,  h:false},
+  {n:'Property Tax',            due:'2026-07-01', a:500.00,  apr:0,     h:false},
+  {n:'Comcast',                 due:'2026-07-05', a:100.00,  apr:0,     h:false},
+  {n:'Water',                   due:'2026-07-06', a:197.45,  apr:0,     h:false},
+  {n:'BOA',                     due:'2026-07-06', a:100.00,  apr:0,     h:false},
+  {n:'Capital One 1887',        due:'2026-07-06', a:106.00,  apr:28.49, h:true},
+  {n:'AT&T',                    due:'2026-07-07', a:197.00,  apr:0,     h:false},
+  {n:'Capital One 4417',        due:'2026-07-08', a:73.00,   apr:24.49, h:true},
+  {n:'Citi Costco',             due:'2026-07-08', a:355.49,  apr:22.74, h:true},
+  {n:'Chase Freedom',           due:'2026-07-10', a:275.00,  apr:27.49, h:true},
+  {n:'Wells Fargo',             due:'2026-07-11', a:68.00,   apr:23.49, h:true},
+  {n:'Inam Life Insurance',     due:'2026-07-11', a:106.64,  apr:0,     h:false},
+  {n:'PayPal',                  due:'2026-07-13', a:100.00,  apr:0,     h:false},
+  {n:'Nicor Gas',               due:'2026-07-16', a:73.17,   apr:0,     h:false},
+  {n:'Chase Disney',            due:'2026-07-23', a:176.00,  apr:26.49, h:true},
 ];
 
-function getAvalancheTarget(checkDate) {
-  for (const t of AVALANCHE_TARGETS) {
-    if (checkDate <= new Date(t.until+'T12:00:00')) return t.target;
-  }
-  return 'savings — you are DEBT FREE! 🎉';
+const AVALANCHE = [
+  {until:'2026-07-31', t:'Capital One 1887 (28.49%)'},
+  {until:'2026-09-15', t:'Chase Freedom (27.49%)'},
+  {until:'2026-10-20', t:'Chase Disney (26.49%)'},
+  {until:'2026-12-10', t:'Capital One 4417 (24.49%)'},
+  {until:'2027-01-05', t:'Wells Fargo (23.49%)'},
+  {until:'2027-03-31', t:'Citi Costco (22.74%)'},
+];
+
+const END = new Date('2027-03-31T12:00:00');
+let SCHEDULE=[], currentFilter='all', collapsed=false;
+
+const fmt = n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const moLabel = d=>d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+function getTarget(d){
+  for(const x of AVALANCHE) if(d<=new Date(x.until+'T12:00:00')) return x.t;
+  return 'savings 🎉 — credit cards paid off!';
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
-  return lines.slice(1).map(line => {
-    const vals = [];
-    let cur = '', inQ = false;
-    for (const ch of line) {
-      if (ch==='"') inQ=!inQ;
-      else if (ch===',' && !inQ) { vals.push(cur.trim()); cur=''; }
-      else cur+=ch;
-    }
-    vals.push(cur.trim());
-    const obj={};
-    headers.forEach((h,i)=>obj[h]=vals[i]||'');
-    return obj;
-  }).filter(r=>r['Bill / Card Name'] && r['Bill / Card Name'].trim());
-}
-
-function parseDate(s) {
-  if (!s) return null;
-  s = s.replace(/"/g,'').trim();
-  // Handle M/D/YYYY or MM/DD/YYYY
-  const parts = s.split('/');
-  if (parts.length === 3) {
-    const [m,d,y] = parts;
-    return new Date(`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T12:00:00`);
-  }
-  return new Date(s+'T12:00:00');
-}
-
-function addMonths(d, n) {
-  const r = new Date(d);
-  r.setMonth(r.getMonth()+n);
-  // Clamp to last day of month
-  const lastDay = new Date(r.getFullYear(), r.getMonth()+1, 0).getDate();
-  if (r.getDate() > lastDay) r.setDate(lastDay);
+function addMonths(d,n){
+  const r=new Date(d); r.setMonth(r.getMonth()+n);
+  const last=new Date(r.getFullYear(),r.getMonth()+1,0).getDate();
+  if(r.getDate()>last) r.setDate(last);
   return r;
 }
 
-function getMonthlyDues(firstDue, end) {
-  const dues = [];
-  let d = new Date(firstDue);
-  while (d <= end) {
-    dues.push(new Date(d));
-    d = addMonths(d, 1);
-  }
+function getDues(firstDue){
+  const dues=[]; let d=new Date(firstDue+'T12:00:00');
+  while(d<=END){ dues.push(new Date(d)); d=addMonths(d,1); }
   return dues;
 }
 
-function findBestCheck(dueDate) {
-  let best = null;
-  for (const c of ALL_CHECKS) {
-    if (c.d <= dueDate) best = c;
-    else break;
-  }
+function bestCheck(due){
+  let best=null;
+  for(const c of ALL_CHECKS){ if(c.d<=due) best=c; else break; }
   return best;
 }
 
-function moLabel(d) {
-  return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-}
+function buildSchedule(bills){
+  const map=new Map();
+  // Always add Wife Jun 5 with no bills
+  map.set('2026-06-05',{check:ALL_CHECKS.find(c=>c.d.toISOString().startsWith('2026-06-05')),items:[]});
 
-function fmt(n) {
-  return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-let SCHEDULE = [];
-let currentFilter = 'all';
-let collapsed = false;
-
-function buildSchedule(bills) {
-  const END = new Date('2027-03-31T12:00:00');
-  const assignments = new Map();
-
-  // Always include Wife Jun 5 even if no bills
-  assignments.set('2026-06-05', {check: ALL_CHECKS.find(c=>c.d.toISOString().startsWith('2026-06-05')), items:[]});
-
-  for (const bill of bills) {
-    const name = bill['Bill / Card Name'].trim();
-    const minPay = parseFloat((bill['Min Payment ($)']||'0').replace(/[$,]/g,'')) || 0;
-    const apr = parseFloat((bill['APR (%)']||'0').replace('%','')) || 0;
-    const isHigh = !!(HIGH_APR[name] || (apr >= 22));
-    const firstDueRaw = bill['Actual Due Date'];
-    if (!firstDueRaw || !minPay) continue;
-    const firstDue = parseDate(firstDueRaw);
-    if (!firstDue || isNaN(firstDue)) continue;
-
-    const dues = getMonthlyDues(firstDue, END);
-    for (const due of dues) {
-      const best = findBestCheck(due);
-      if (!best) continue;
-      const key = best.d.toISOString().split('T')[0];
-      if (!assignments.has(key)) assignments.set(key, {check: best, items:[]});
-      assignments.get(key).items.push({
-        n: name,
-        d: due.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
-        a: minPay,
-        apr: apr,
-        h: isHigh
-      });
+  for(const b of bills){
+    for(const due of getDues(b.due)){
+      const c=bestCheck(due);
+      if(!c) continue;
+      const k=c.d.toISOString().split('T')[0];
+      if(!map.has(k)) map.set(k,{check:c,items:[]});
+      map.get(k).items.push({n:b.n, d:due.toLocaleDateString('en-US',{month:'short',day:'numeric'}), a:b.a, apr:b.apr, h:b.h});
     }
   }
 
-  // Convert to sorted array
-  SCHEDULE = Array.from(assignments.entries())
-    .sort((a,b)=>new Date(a[0])-new Date(b[0]))
-    .map(([key, val]) => {
-      const {check, items} = val;
-      const net = check.net;
-      const tot = items.reduce((s,x)=>s+x.a,0);
-      const left = net - tot;
-      const target = getAvalancheTarget(check.d);
-      const tip = items.length === 0
-        ? `⚡ No bills due — send the ENTIRE ${fmt(net)} → ${target}`
-        : left > 0
-          ? `⚡ ${fmt(left)} leftover → ${target}`
-          : '';
-      return {
-        mo: moLabel(check.d),
-        date: check.d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-        p: check.p,
-        net,
-        sf: left < 0,
-        tip,
-        b: items
-      };
-    });
+  SCHEDULE=Array.from(map.entries()).sort((a,b)=>new Date(a[0])-new Date(b[0])).map(([,val])=>{
+    const {check:c,items}=val;
+    const tot=items.reduce((s,x)=>s+x.a,0);
+    const left=c.net-tot;
+    const tgt=getTarget(c.d);
+    const tip=items.length===0?`⚡ No bills due — send the ENTIRE ${fmt(c.net)} → ${tgt}`:
+              left>0?`⚡ ${fmt(left)} leftover → ${tgt}`:'';
+    return{mo:moLabel(c.d),date:c.d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+           p:c.p,net:c.net,sf:left<0,tip,b:items};
+  });
 }
 
-function render() {
-  const feed = document.getElementById('feed');
-  const list = SCHEDULE.filter(c => {
-    if (currentFilter==='shortfall') return c.sf;
-    if (currentFilter==='highcredit') return c.b.some(x=>x.h);
+// ── PARSE GVIZ JSON RESPONSE ──
+function parseGviz(text){
+  // gviz returns: google.visualization.Query.setResponse({...})
+  const json=JSON.parse(text.replace(/^[^\(]+\(/,'').replace(/\);?\s*$/,''));
+  const cols=json.table.cols.map(c=>c.label);
+  const rows=json.table.rows||[];
+
+  return rows.map(row=>{
+    const obj={};
+    cols.forEach((col,i)=>{
+      const cell=row.c&&row.c[i];
+      obj[col]=cell&&cell.v!=null?String(cell.v):'';
+    });
+    return obj;
+  }).filter(r=>r['Bill / Card Name']&&r['Bill / Card Name'].trim());
+}
+
+function rowsToBills(rows){
+  return rows.map(r=>{
+    const name=(r['Bill / Card Name']||'').trim();
+    if(!name) return null;
+    const min=parseFloat((r['Min Payment ($)']||'0').replace(/[$,]/g,''))||0;
+    const apr=parseFloat((r['APR (%)']||'0').replace(/[%,]/g,''))||0;
+    const dueRaw=(r['Actual Due Date']||'').trim();
+    if(!dueRaw||!min) return null;
+
+    // Parse M/D/YYYY
+    const parts=dueRaw.split('/');
+    if(parts.length!==3) return null;
+    const [mo,dy,yr]=parts;
+    const due=`${yr}-${mo.padStart(2,'0')}-${dy.padStart(2,'0')}`;
+    if(isNaN(new Date(due+'T12:00:00'))) return null;
+
+    const h=apr>=22.5;
+    return {n:name, due, a:min, apr, h};
+  }).filter(Boolean);
+}
+
+async function loadData(){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  document.getElementById('subText').textContent='Fetching from Google Sheets...';
+
+  try{
+    // Use gviz tq endpoint — works from browsers without CORS issues
+    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}&t=${Date.now()}`;
+    const resp=await fetch(url);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    if(!text.includes('google.visualization')) throw new Error('Unexpected response format');
+
+    const rows=parseGviz(text);
+    const bills=rowsToBills(rows);
+    if(!bills.length) throw new Error('No bill data found in sheet');
+
+    const totalMin=bills.reduce((s,b)=>s+b.a,0);
+    document.getElementById('totalMin').textContent=fmt(totalMin);
+    buildSchedule(bills);
+
+    const now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    document.getElementById('lastUpdated').textContent='Live data · Last fetched: '+now;
+    document.getElementById('subText').textContent='Live · Jun 2026 → Mar 2027';
+    document.getElementById('noticeBar').className='notice live';
+    document.getElementById('noticeText').textContent='Live data — pulled from your Google Spreadsheet. Change a due date → hit Refresh → updates instantly.';
+    render();
+
+  }catch(e){
+    console.warn('Live fetch failed:',e.message,'— using static fallback');
+    buildSchedule(STATIC_BILLS);
+    document.getElementById('subText').textContent='Cached data · Jun 2026 → Mar 2027';
+    document.getElementById('lastUpdated').textContent='⚠ Could not reach Google Sheets ('+e.message+') — showing last known data. Hit Refresh to try again.';
+    document.getElementById('noticeBar').className='notice cached';
+    document.getElementById('noticeText').textContent='Showing cached snapshot. Hit Refresh to load live data from your spreadsheet.';
+    render();
+  }
+  btn.classList.remove('spinning');
+}
+
+function render(){
+  const feed=document.getElementById('feed');
+  const list=SCHEDULE.filter(c=>{
+    if(currentFilter==='shortfall') return c.sf;
+    if(currentFilter==='highcredit') return c.b.some(x=>x.h);
     return true;
   });
-
-  if (!list.length) { feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">No results.</div>'; return; }
-
-  let html='', lastMo='';
-  list.forEach(c => {
-    if (c.mo!==lastMo) {
-      html+=`<div class="mdiv" data-mo="${c.mo}">${c.mo}</div>`;
-      lastMo=c.mo;
-    }
+  if(!list.length){feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">No results.</div>';return;}
+  let html='',lastMo='';
+  list.forEach(c=>{
+    if(c.mo!==lastMo){html+=`<div class="mdiv" data-mo="${c.mo}">${c.mo}</div>`;lastMo=c.mo;}
     const tot=c.b.reduce((s,x)=>s+x.a,0);
     const left=c.net-tot;
     const isMuh=c.p==='Muhammad';
@@ -382,121 +362,6 @@ function render() {
   if(collapsed) document.querySelectorAll('.pcheck').forEach(c=>c.classList.add('collapsed'));
 }
 
-
-function buildStaticFallback() {
-  // Static snapshot from your Google Sheet — used when live fetch fails
-  const STATIC_BILLS = [
-    {name:'Tehmina Life Insurance', due:'2026-06-16', min:61.00,   apr:0,     high:false},
-    {name:'Parking Cash',           due:'2026-06-25', min:100.00,  apr:0,     high:false},
-    {name:'Citi Bank',              due:'2026-06-27', min:50.00,   apr:0,     high:false},
-    {name:'ComEd',                  due:'2026-06-27', min:113.05,  apr:0,     high:false},
-    {name:'All State Auto Insurance',due:'2026-06-30',min:252.47,  apr:0,     high:false},
-    {name:'Association',            due:'2026-07-01', min:170.00,  apr:0,     high:false},
-    {name:'Donation',               due:'2026-07-01', min:100.00,  apr:0,     high:false},
-    {name:'Auto Loan',              due:'2026-07-01', min:468.61,  apr:2.7,   high:false},
-    {name:'Rent / Mortgage',        due:'2026-07-01', min:1047.46, apr:2.87,  high:false},
-    {name:'Property Tax',           due:'2026-07-01', min:500.00,  apr:0,     high:false},
-    {name:'Comcast',                due:'2026-07-05', min:100.00,  apr:0,     high:false},
-    {name:'Water',                  due:'2026-07-06', min:197.45,  apr:0,     high:false},
-    {name:'BOA',                    due:'2026-07-06', min:100.00,  apr:0,     high:false},
-    {name:'Capital One 1887',       due:'2026-07-06', min:106.00,  apr:28.49, high:true},
-    {name:'AT&T',                   due:'2026-07-07', min:197.00,  apr:0,     high:false},
-    {name:'Capital One 4417',       due:'2026-07-08', min:73.00,   apr:24.49, high:true},
-    {name:'Citi Costco',            due:'2026-07-08', min:355.49,  apr:22.74, high:true},
-    {name:'Chase Freedom',          due:'2026-07-10', min:275.00,  apr:27.49, high:true},
-    {name:'Wells Fargo',            due:'2026-07-11', min:68.00,   apr:23.49, high:true},
-    {name:'Inam Life Insurance',    due:'2026-07-11', min:106.64,  apr:0,     high:false},
-    {name:'PayPal',                 due:'2026-07-13', min:100.00,  apr:0,     high:false},
-    {name:'Nicor Gas',              due:'2026-07-16', min:73.17,   apr:0,     high:false},
-    {name:'Chase Disney',           due:'2026-07-23', min:176.00,  apr:26.49, high:true},
-  ];
-
-  const END = new Date('2027-03-31T12:00:00');
-  const assignments = new Map();
-  assignments.set('2026-06-05', {check: ALL_CHECKS.find(c=>c.d.toISOString().startsWith('2026-06-05')), items:[]});
-
-  for (const bill of STATIC_BILLS) {
-    const firstDue = new Date(bill.due + 'T12:00:00');
-    const dues = getMonthlyDues(firstDue, END);
-    for (const due of dues) {
-      const best = findBestCheck(due);
-      if (!best) continue;
-      const key = best.d.toISOString().split('T')[0];
-      if (!assignments.has(key)) assignments.set(key, {check: best, items:[]});
-      assignments.get(key).items.push({
-        n: bill.name,
-        d: due.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
-        a: bill.min, apr: bill.apr, h: bill.high
-      });
-    }
-  }
-
-  SCHEDULE = Array.from(assignments.entries())
-    .sort((a,b)=>new Date(a[0])-new Date(b[0]))
-    .map(([key, val]) => {
-      const {check, items} = val;
-      const net = check.net;
-      const tot = items.reduce((s,x)=>s+x.a,0);
-      const left = net - tot;
-      const target = getAvalancheTarget(check.d);
-      const tip = items.length === 0
-        ? `⚡ No bills due — send the ENTIRE ${fmt(net)} → ${target}`
-        : left > 0 ? `⚡ ${fmt(left)} leftover → ${target}` : '';
-      return { mo: moLabel(check.d), date: check.d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), p: check.p, net, sf: left<0, tip, b: items };
-    });
-
-  document.getElementById('subText').textContent = '⚠ Showing cached data (live fetch failed)';
-  document.getElementById('lastupdated').textContent = 'Using static snapshot — update your sheet and hit Refresh to get live data';
-  render();
-}
-
-async function loadData() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  document.getElementById('subText').textContent='Fetching from Google Sheets...';
-
-  try {
-    let text = null;
-    let lastErr = '';
-    for (const proxyFn of PROXIES) {
-      try {
-        const resp = await fetch(proxyFn(SHEET_URL));
-        if (!resp.ok) throw new Error('HTTP '+resp.status);
-        text = await resp.text();
-        if (text && text.includes('Bill / Card Name')) break; // valid CSV
-        text = null;
-      } catch(e) { lastErr = e.message; }
-    }
-    if (!text) throw new Error('All proxies failed. Last error: ' + lastErr);
-    const bills = parseCSV(text);
-    buildSchedule(bills);
-
-    // Update total min
-    const totalMin = bills.reduce((s,b)=>{
-      const v=parseFloat((b['Min Payment ($)']||'0').replace(/[$,]/g,''))||0;
-      return s+v;
-    },0);
-    document.getElementById('totalMin').textContent=fmt(totalMin);
-
-    const now = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-    document.getElementById('lastupdated').textContent='Last updated: '+now;
-    document.getElementById('subText').textContent='Live · Jun 2026 → Mar 2027';
-    render();
-  } catch(e) {
-    // Show friendly error with fallback static data
-    document.getElementById('feed').innerHTML=`<div class="errmsg">
-      <strong>⚠ Could not load live data.</strong><br><br>
-      <strong>If you are viewing this on GitHub Pages</strong> — try the Refresh button. The proxy may be temporarily unavailable.<br><br>
-      <strong>If you are previewing inside Claude.ai</strong> — this is expected. Claude's preview sandbox blocks external requests. Upload to GitHub and it will work correctly.<br><br>
-      <small style="opacity:.7">Error: ${e.message}</small>
-    </div>`;
-    // Load static fallback
-    buildStaticFallback();
-    document.getElementById('subText').textContent='Error loading data';
-  }
-  btn.classList.remove('spinning');
-}
-
 function toggleAll(){
   collapsed=!collapsed;
   document.querySelectorAll('.pcheck').forEach(c=>collapsed?c.classList.add('collapsed'):c.classList.remove('collapsed'));
@@ -507,26 +372,23 @@ function toggleAll(){
 document.querySelectorAll('.jbtn').forEach(b=>{
   b.addEventListener('click',()=>{
     const mo=b.dataset.mo;
-    const divs=document.querySelectorAll('.mdiv');
-    for(const d of divs){
+    document.querySelectorAll('.mdiv').forEach(d=>{
       if(d.dataset.mo===mo){
-        const hdrH=document.querySelector('.header').offsetHeight+document.getElementById('jumpbar').offsetHeight;
+        const hdrH=document.querySelector('.header').offsetHeight+document.querySelector('.jumpbar').offsetHeight;
         window.scrollTo({top:d.getBoundingClientRect().top+window.scrollY-hdrH-8,behavior:'smooth'});
         document.querySelectorAll('.jbtn').forEach(x=>x.classList.remove('active'));
         b.classList.add('active');
-        return;
       }
-    }
+    });
   });
 });
 
 // Scroll spy
 window.addEventListener('scroll',()=>{
-  const divs=document.querySelectorAll('.mdiv');
-  const hdrH=document.querySelector('.header').offsetHeight+document.getElementById('jumpbar').offsetHeight+20;
-  let current='';
-  divs.forEach(d=>{if(d.getBoundingClientRect().top<=hdrH)current=d.dataset.mo;});
-  document.querySelectorAll('.jbtn').forEach(b=>b.classList.toggle('active',b.dataset.mo===current));
+  const hdrH=document.querySelector('.header').offsetHeight+document.querySelector('.jumpbar').offsetHeight+20;
+  let cur='';
+  document.querySelectorAll('.mdiv').forEach(d=>{if(d.getBoundingClientRect().top<=hdrH)cur=d.dataset.mo;});
+  document.querySelectorAll('.jbtn').forEach(b=>b.classList.toggle('active',b.dataset.mo===cur));
 },{passive:true});
 
 // Filters
@@ -539,7 +401,6 @@ document.querySelectorAll('.ftab').forEach(b=>{
   });
 });
 
-// Load on page open
 loadData();
 </script>
 </body>
