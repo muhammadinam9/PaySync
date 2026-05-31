@@ -79,6 +79,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .pos{color:var(--green);}.neg{color:var(--red);}
 .avl{margin:0 0 12px;background:rgba(59,47,208,0.05);border:0.5px solid rgba(59,47,208,0.18);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--muh);line-height:1.6;}
 .sfail{margin:0 0 12px;background:rgba(181,42,42,0.05);border:0.5px solid rgba(181,42,42,0.2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--red);line-height:1.6;}
+
+/* ── MARK PAID MODAL ── */
+.modal-bd{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.4);align-items:flex-end;justify-content:center;}
+.modal-bd.open{display:flex;}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 40px;width:100%;max-width:480px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(80px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhandle{width:36px;height:4px;border-radius:4px;background:#ddd;margin:0 auto 18px;}
+.mtitle{font-size:17px;font-weight:600;color:#1a1a24;margin-bottom:3px;}
+.msub{font-size:13px;color:#5a5a6e;margin-bottom:18px;}
+.mfield{margin-bottom:13px;}
+.mlabel{font-size:12px;font-weight:600;color:#3a3a4a;margin-bottom:6px;letter-spacing:.4px;display:block;}
+.minput{width:100%;padding:12px 14px;border:1.5px solid #d8d6d2;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a1a24;background:#f9f8f5;outline:none;transition:border-color .2s;}
+.minput:focus{border-color:#3b2fd0;background:#fff;}
+.mactions{display:flex;gap:10px;margin-top:18px;}
+.mbtn-cancel{flex:1;padding:14px;border-radius:12px;border:1.5px solid #d8d6d2;background:#f5f4f0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#3a3a4a;cursor:pointer;}
+.mbtn-save{flex:2;padding:14px;border-radius:12px;border:none;background:#3b2fd0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#fff;cursor:pointer;}
+.mbtn-save:disabled{background:#9999b0;cursor:not-allowed;}
+.mpbtn{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.15);background:#fff;color:#5a5a6e;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;margin-top:5px;display:inline-block;}
+.mpbtn.paid{background:rgba(10,122,74,0.1);border-color:rgba(10,122,74,0.3);color:#0a7a4a;}
+.msaving{display:none;text-align:center;padding:8px 0;font-size:13px;color:#3b2fd0;}
 </style>
 </head>
 <body>
@@ -375,7 +395,7 @@ function render(){
       :c.b.map(x=>{
         const dot=x.h?'#b52a2a':(isMuh?'#3b2fd0':'#0a7a4a');
         const apr=x.h?`<span class="at">${x.apr}%</span>`:'';
-        return `<div class="brow"><div class="bd" style="background:${dot}"></div><div class="bn">${x.n}</div><div class="bdue">${x.d}</div>${apr}<div class="ba">${fmt(x.a)}</div></div>`;
+        return `<div class="brow"><div class="bd" style="background:${dot}"></div><div class="bn">${x.n}</div><div class="bdue">${x.d}</div>${apr}<div class="ba">${fmt(x.a)}</div><button class="mpbtn" onclick="openMarkPaid('${x.n.replace(/'/g,"&apos;")}')" id="mpb-${x.n.replace(/[^a-z0-9]/gi,'_')}">✓ Pay</button></div>`;
       }).join('');
     const totRow=c.b.length>0
       ?`<div class="trow"><div class="tl">Bills: <span class="tb">${fmt(tot)}</span></div><div style="text-align:right"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Leftover</div><div class="tleft ${left>=0?'pos':'neg'}">${left>=0?'+':''}${fmt(left)}</div></div></div>`
@@ -437,6 +457,121 @@ document.querySelectorAll('.ftab').forEach(b=>{
 });
 
 loadData();
+
+// ── MARK PAID ──
+let currentBill = '';
+
+function openMarkPaid(billName) {
+  currentBill = billName;
+  document.getElementById('modalTitle').textContent = billName;
+  document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mAmount').value = '';
+  document.getElementById('mNote').value = '';
+  document.getElementById('mSaving').style.display = 'none';
+  document.getElementById('mSaveBtn').disabled = false;
+  document.getElementById('modalBd').classList.add('open');
+  setTimeout(() => document.getElementById('mAmount').focus(), 300);
+}
+
+function closeModal() {
+  document.getElementById('modalBd').classList.remove('open');
+}
+
+document.getElementById('modalBd').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+async function savePaid() {
+  const date   = document.getElementById('mDate').value;
+  const amount = parseFloat(document.getElementById('mAmount').value);
+  const note   = document.getElementById('mNote').value.trim();
+
+  if (!date)           { alert('Please enter the date paid.'); return; }
+  if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+
+  // Disable button, show saving
+  document.getElementById('mSaveBtn').disabled = true;
+  document.getElementById('mSaving').style.display = 'block';
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        billName:   currentBill,
+        datePaid:   date,
+        amountPaid: amount,
+        note:       note
+      })
+    });
+
+    const result = await resp.json();
+
+    if (result.status === 'ok') {
+      // Mark button as paid
+      const btnId = 'mpb-' + currentBill.replace(/[^a-z0-9]/gi, '_');
+      const btn = document.getElementById(btnId);
+      if (btn) { btn.textContent = '✓ Paid'; btn.classList.add('paid'); }
+
+      closeModal();
+
+      // Show success toast
+      showToast('✅ ' + currentBill + ' marked paid! New due: ' + result.newDueDate);
+
+      // Auto-refresh schedule after 2 seconds
+      setTimeout(() => loadData(), 2000);
+
+    } else {
+      throw new Error(result.message || 'Unknown error');
+    }
+
+  } catch(err) {
+    alert('Error saving payment: ' + err.message);
+    document.getElementById('mSaveBtn').disabled = false;
+    document.getElementById('mSaving').style.display = 'none';
+  }
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a24;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:500;text-align:center;max-width:320px;line-height:1.4;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
 </script>
+
+<!-- MARK PAID MODAL -->
+<div class="modal-bd" id="modalBd">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="modalTitle">Mark as Paid</div>
+    <div class="msub">Updates your Google Sheet automatically</div>
+    <div class="mfield">
+      <label class="mlabel" for="mDate">Date Paid</label>
+      <input class="minput" type="date" id="mDate"/>
+    </div>
+    <div class="mfield">
+      <label class="mlabel" for="mAmount">Amount Paid ($)</label>
+      <input class="minput" type="number" id="mAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal"/>
+    </div>
+    <div class="mfield">
+      <label class="mlabel" for="mNote">Note (optional)</label>
+      <input class="minput" type="text" id="mNote" placeholder="e.g. autopay, partial payment"/>
+    </div>
+    <div class="msaving" id="mSaving">⏳ Saving to Google Sheet...</div>
+    <div class="mactions">
+      <button class="mbtn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="mbtn-save" id="mSaveBtn" onclick="savePaid()">Save Payment</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
