@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PaySync — Payment Schedule</title>
+<title>PaySync — Live Payment Schedule</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -12,26 +12,54 @@
 :root{--bg:#f5f4f0;--bg2:#fff;--bg3:#eeecea;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--text:#1a1a24;--text2:#3a3a4a;--text3:#5a5a6e;--muh:#3b2fd0;--wife:#0a7a4a;--red:#b52a2a;--green:#0a7a4a;--r:13px;--rs:8px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;padding-bottom:30px;}
+
 .header{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:14px 16px 0;position:sticky;top:0;z-index:50;}
 .hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .logo{font-size:17px;font-weight:600;color:var(--text);}.logo span{color:var(--muh);}
 .sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.cbtn{font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--muh);cursor:pointer;font-family:'DM Sans',sans-serif;}
+.hbtns{display:flex;gap:8px;align-items:center;}
+.cbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--muh);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.rbtn{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid rgba(10,122,74,0.3);background:rgba(10,122,74,0.06);color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:4px;}
+.rbtn i{font-size:14px;}
+.rbtn.spinning i{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
 .filters{display:flex;overflow-x:auto;scrollbar-width:none;border-top:0.5px solid var(--border);}
 .filters::-webkit-scrollbar{display:none;}
 .ftab{flex:none;padding:10px 16px;font-size:12px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;white-space:nowrap;}
 .ftab.active{color:var(--muh);border-bottom-color:var(--muh);}
-.notice{background:rgba(59,47,208,0.05);border-bottom:0.5px solid rgba(59,47,208,0.15);padding:10px 16px;font-size:12px;color:var(--muh);line-height:1.6;}
+
+.jumpbar{display:flex;overflow-x:auto;scrollbar-width:none;gap:6px;padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);}
+.jumpbar::-webkit-scrollbar{display:none;}
+.jbtn{flex:none;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s;}
+.jbtn.active{background:var(--muh);color:#fff;border-color:var(--muh);}
+
+.notice{background:rgba(59,47,208,0.05);border-bottom:0.5px solid rgba(59,47,208,0.15);padding:10px 16px;font-size:12px;color:var(--muh);line-height:1.6;display:flex;align-items:center;gap:8px;}
+.notice .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);}
 .sc{background:var(--bg3);border-radius:var(--rs);padding:10px 12px;}
 .sc .sl{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
 .sc .sv{font-size:14px;font-weight:600;font-family:'DM Mono',monospace;}
+
 .legend{display:flex;gap:14px;padding:9px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-wrap:wrap;}
 .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
 .ld{width:8px;height:8px;border-radius:50%;}
+
 .feed{padding:12px 16px;}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 20px;color:var(--text3);}
+.loading i{font-size:36px;display:block;margin-bottom:12px;animation:spin 1s linear infinite;color:var(--muh);}
+.loading p{font-size:13px;}
+
+/* ERROR */
+.errmsg{margin:16px;background:rgba(181,42,42,0.05);border:0.5px solid rgba(181,42,42,0.2);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--red);line-height:1.6;}
+
 .mdiv{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:16px 0 8px;display:flex;align-items:center;gap:8px;}
 .mdiv::after{content:'';flex:1;height:0.5px;background:var(--border2);}
+
 .pcheck{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
 .pcheck.sf{border-left:3px solid var(--red);}
 .pcheck.mc{border-left:3px solid var(--muh);}
@@ -48,6 +76,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .pcheck.collapsed .chv{transform:rotate(-90deg);}
 .cbody{padding:0 14px;}
 .pcheck.collapsed .cbody{display:none;}
+
 .nobills{padding:14px 0;font-size:13px;color:var(--text3);font-style:italic;}
 .brow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);}
 .brow:last-of-type{border-bottom:none;}
@@ -56,24 +85,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .bdue{font-size:10px;color:var(--text3);flex-shrink:0;font-family:'DM Mono',monospace;}
 .at{font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:rgba(181,42,42,0.08);color:var(--red);flex-shrink:0;}
 .ba{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;min-width:62px;text-align:right;}
+
 .trow{display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;}
 .tl{font-size:12px;color:var(--text3);}
 .tb{font-family:'DM Mono',monospace;font-size:12px;color:var(--red);}
 .tleft{font-family:'DM Mono',monospace;font-size:17px;font-weight:700;}
 .pos{color:var(--green);}.neg{color:var(--red);}
+
 .avl{margin:0 0 12px;background:rgba(59,47,208,0.05);border:0.5px solid rgba(59,47,208,0.18);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--muh);line-height:1.6;}
 .sfail{margin:0 0 12px;background:rgba(181,42,42,0.05);border:0.5px solid rgba(181,42,42,0.2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--red);line-height:1.6;}
-.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;}
+.lastupdated{font-size:10px;color:var(--text3);padding:4px 16px 8px;text-align:right;}
 </style>
 </head>
 <body>
+
 <div class="header">
   <div class="hrow">
     <div>
-      <div class="logo">Pay<span>Sync</span> — Payment Schedule</div>
-      <div class="sub">Live from Google Spreadsheet · Jun 5, 2026 → Mar 2027</div>
+      <div class="logo">Pay<span>Sync</span> — Live Schedule</div>
+      <div class="sub" id="subText">Fetching from Google Sheets...</div>
     </div>
-    <button class="cbtn" id="toggleBtn" onclick="toggleAll()">Collapse All</button>
+    <div class="hbtns">
+      <button class="rbtn" id="refreshBtn" onclick="loadData()">
+        <i class="ti ti-refresh" aria-hidden="true"></i>Refresh
+      </button>
+      <button class="cbtn" id="toggleBtn" onclick="toggleAll()">Collapse All</button>
+    </div>
   </div>
   <div class="filters">
     <button class="ftab active" data-filter="all">All Paychecks</button>
@@ -81,56 +118,250 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
     <button class="ftab" data-filter="highcredit">⚡ High APR</button>
   </div>
 </div>
-<div class="notice">
-  ✅ <strong>Jun 1 Muhammad already paid.</strong> Schedule starts Wife Jun 5 → Muhammad Jun 15 → onward. All dates from your Google Spreadsheet directly.
+
+<div class="jumpbar" id="jumpbar">
+  <button class="jbtn" data-mo="June 2026">Jun 26</button>
+  <button class="jbtn" data-mo="July 2026">Jul 26</button>
+  <button class="jbtn" data-mo="August 2026">Aug 26</button>
+  <button class="jbtn" data-mo="September 2026">Sep 26</button>
+  <button class="jbtn" data-mo="October 2026">Oct 26</button>
+  <button class="jbtn" data-mo="November 2026">Nov 26</button>
+  <button class="jbtn" data-mo="December 2026">Dec 26</button>
+  <button class="jbtn" data-mo="January 2027">Jan 27</button>
+  <button class="jbtn" data-mo="February 2027">Feb 27</button>
+  <button class="jbtn" data-mo="March 2027">Mar 27</button>
 </div>
+
+<div class="notice">
+  <div class="live-dot"></div>
+  <span><strong>Live data</strong> — pulled from your Google Spreadsheet every time you open or refresh this page. Change a due date in your sheet → hit Refresh → schedule updates instantly.</span>
+</div>
+
 <div class="summary">
   <div class="sc"><div class="sl">Muh / check</div><div class="sv" style="color:var(--muh);">$3,047</div></div>
   <div class="sc"><div class="sl">Wife / check</div><div class="sv" style="color:var(--wife);">$2,000</div></div>
-  <div class="sc"><div class="sl">Min Bills/mo</div><div class="sv" style="color:var(--red);">$4,790</div></div>
+  <div class="sc"><div class="sl">Min Bills/mo</div><div class="sv" style="color:var(--red);" id="totalMin">$4,790</div></div>
 </div>
+
 <div class="legend">
   <div class="li"><div class="ld" style="background:var(--muh);"></div>Muhammad</div>
   <div class="li"><div class="ld" style="background:var(--wife);"></div>Wife</div>
   <div class="li"><div class="ld" style="background:var(--red);"></div>High APR</div>
 </div>
-<div class="feed" id="feed"></div>
+
+<div id="lastupdated" class="lastupdated"></div>
+<div class="feed" id="feed">
+  <div class="loading">
+    <i class="ti ti-loader-2" aria-hidden="true"></i>
+    <p>Loading your bill schedule from Google Sheets...</p>
+  </div>
+</div>
+
 <script>
-const C=[{"mo":"June 2026","date":"Jun 05, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 No bills due Jun 5\u201314. Send the ENTIRE $2,000 \u2192 Capital One 1887 (28.49%) \u2014 biggest possible opening attack!","b":[]},{"mo":"June 2026","date":"Jun 15, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,986 leftover \u2192 ALL to Capital One 1887 (28.49%)","b":[{"n":"Tehmina Life Insurance","d":"Jun 16","a":61.0,"apr":0,"h":false}]},{"mo":"June 2026","date":"Jun 19, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,737 leftover \u2192 Capital One 1887 (28.49%)","b":[{"n":"Parking Cash","d":"Jun 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Jun 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Jun 27","a":113.05,"apr":0,"h":false}]},{"mo":"June 2026","date":"Jun 29, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $508 leftover \u2192 Capital One 1887 (28.49%)","b":[{"n":"All State Auto Insurance","d":"Jun 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Jul 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Jul 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Jul 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Jul 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Jul 01","a":500.0,"apr":0,"h":false}]},{"mo":"July 2026","date":"Jul 03, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $421 leftover \u2192 Capital One 1887 (28.49%)","b":[{"n":"Comcast","d":"Jul 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Jul 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Jul 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Jul 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Jul 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Jul 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Jul 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Jul 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Jul 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Jul 11","a":106.64,"apr":0,"h":false}]},{"mo":"July 2026","date":"Jul 13, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,812 leftover \u2192 Capital One 1887 \u2014 BIG PAYMENT! Nearly paid off.","b":[{"n":"Tehmina Life Insurance","d":"Jul 16","a":61.0,"apr":0,"h":false},{"n":"PayPal","d":"Jul 13","a":100.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Jul 16","a":73.17,"apr":0,"h":false}]},{"mo":"July 2026","date":"Jul 17, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,724 leftover \u2192 Capital One 1887 \u2014 PAID OFF target!","b":[{"n":"Parking Cash","d":"Jul 25","a":100.0,"apr":0,"h":false},{"n":"Chase Disney","d":"Jul 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"July 2026","date":"Jul 27, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,631 leftover \u2192 Chase Freedom (27.49%) \u2014 Cap One 1887 done!","b":[{"n":"Citi Bank","d":"Jul 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Jul 27","a":113.05,"apr":0,"h":false},{"n":"All State Auto Insurance","d":"Jul 30","a":252.47,"apr":0,"h":false}]},{"mo":"July 2026","date":"Jul 31, 2026","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"Association","d":"Aug 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Aug 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Aug 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Aug 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Aug 01","a":500.0,"apr":0,"h":false},{"n":"Comcast","d":"Aug 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Aug 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Aug 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Aug 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Aug 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Aug 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Aug 08","a":355.49,"apr":22.74,"h":true}]},{"mo":"August 2026","date":"Aug 10, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,497 leftover \u2192 Chase Freedom (27.49%)","b":[{"n":"Chase Freedom","d":"Aug 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Aug 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Aug 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Aug 13","a":100.0,"apr":0,"h":false}]},{"mo":"August 2026","date":"Aug 14, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,689 leftover \u2192 Chase Freedom (27.49%)","b":[{"n":"Tehmina Life Insurance","d":"Aug 16","a":61.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Aug 16","a":73.17,"apr":0,"h":false},{"n":"Chase Disney","d":"Aug 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"August 2026","date":"Aug 24, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,783 leftover \u2192 Chase Freedom \u2014 nearly PAID OFF!","b":[{"n":"Parking Cash","d":"Aug 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Aug 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Aug 27","a":113.05,"apr":0,"h":false}]},{"mo":"August 2026","date":"Aug 28, 2026","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"All State Auto Insurance","d":"Aug 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Sep 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Sep 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Sep 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Sep 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Sep 01","a":500.0,"apr":0,"h":false},{"n":"Comcast","d":"Sep 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Sep 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Sep 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Sep 06","a":106.0,"apr":28.49,"h":true}]},{"mo":"September 2026","date":"Sep 07, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,146 leftover \u2192 Chase Freedom PAID OFF! Now Chase Disney (26.49%)","b":[{"n":"AT&T","d":"Sep 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Sep 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Sep 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Sep 10","a":275.0,"apr":27.49,"h":true}]},{"mo":"September 2026","date":"Sep 11, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,591 leftover \u2192 Chase Disney (26.49%)","b":[{"n":"Tehmina Life Insurance","d":"Sep 16","a":61.0,"apr":0,"h":false},{"n":"Wells Fargo","d":"Sep 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Sep 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Sep 13","a":100.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Sep 16","a":73.17,"apr":0,"h":false}]},{"mo":"September 2026","date":"Sep 21, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,871 leftover \u2192 Chase Disney \u2014 BIG PAYMENT!","b":[{"n":"Chase Disney","d":"Sep 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"September 2026","date":"Sep 25, 2026","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"Parking Cash","d":"Sep 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Sep 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Sep 27","a":113.05,"apr":0,"h":false},{"n":"All State Auto Insurance","d":"Sep 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Oct 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Oct 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Oct 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Oct 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Oct 01","a":500.0,"apr":0,"h":false}]},{"mo":"October 2026","date":"Oct 05, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $1,918 leftover \u2192 Cap One 4417 (24.49%) \u2014 Chase Disney PAID OFF!","b":[{"n":"Comcast","d":"Oct 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Oct 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Oct 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Oct 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Oct 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Oct 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Oct 08","a":355.49,"apr":22.74,"h":true}]},{"mo":"October 2026","date":"Oct 09, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,316 leftover \u2192 Capital One 4417 (24.49%)","b":[{"n":"Tehmina Life Insurance","d":"Oct 16","a":61.0,"apr":0,"h":false},{"n":"Chase Freedom","d":"Oct 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Oct 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Oct 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Oct 13","a":100.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Oct 16","a":73.17,"apr":0,"h":false}]},{"mo":"October 2026","date":"Oct 23, 2026","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"Parking Cash","d":"Oct 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Oct 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Oct 27","a":113.05,"apr":0,"h":false},{"n":"All State Auto Insurance","d":"Oct 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Nov 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Nov 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Nov 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Nov 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Nov 01","a":500.0,"apr":0,"h":false},{"n":"Chase Disney","d":"Oct 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"November 2026","date":"Nov 02, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,947 leftover \u2192 Capital One 4417 \u2014 BIG PAYMENT!","b":[{"n":"Comcast","d":"Nov 05","a":100.0,"apr":0,"h":false}]},{"mo":"November 2026","date":"Nov 06, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $421 leftover \u2192 Capital One 4417 (24.49%)","b":[{"n":"Water","d":"Nov 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Nov 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Nov 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Nov 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Nov 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Nov 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Nov 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Nov 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Nov 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Nov 13","a":100.0,"apr":0,"h":false}]},{"mo":"November 2026","date":"Nov 16, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,912 leftover \u2192 Capital One 4417 (24.49%)","b":[{"n":"Tehmina Life Insurance","d":"Nov 16","a":61.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Nov 16","a":73.17,"apr":0,"h":false}]},{"mo":"November 2026","date":"Nov 20, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,560 leftover \u2192 Capital One 4417 (24.49%)","b":[{"n":"Parking Cash","d":"Nov 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Nov 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Nov 27","a":113.05,"apr":0,"h":false},{"n":"Chase Disney","d":"Nov 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"November 2026","date":"Nov 30, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $508 leftover \u2192 Capital One 4417 \u2014 almost done!","b":[{"n":"All State Auto Insurance","d":"Nov 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Dec 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Dec 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Dec 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Dec 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Dec 01","a":500.0,"apr":0,"h":false}]},{"mo":"December 2026","date":"Dec 04, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $321 leftover \u2192 Capital One 4417 (24.49%)","b":[{"n":"Comcast","d":"Dec 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Dec 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Dec 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Dec 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Dec 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Dec 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Dec 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Dec 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Dec 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Dec 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Dec 13","a":100.0,"apr":0,"h":false}]},{"mo":"December 2026","date":"Dec 14, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,912 leftover \u2192 Cap One 4417 PAID OFF! Now Wells Fargo (23.49%)","b":[{"n":"Tehmina Life Insurance","d":"Dec 16","a":61.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Dec 16","a":73.17,"apr":0,"h":false}]},{"mo":"December 2026","date":"Dec 18, 2026","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,560 leftover \u2192 Wells Fargo (23.49%)","b":[{"n":"Parking Cash","d":"Dec 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Dec 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Dec 27","a":113.05,"apr":0,"h":false},{"n":"Chase Disney","d":"Dec 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"December 2026","date":"Dec 28, 2026","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,794 leftover \u2192 Wells Fargo PAID OFF! Now Citi Costco (22.74%)","b":[{"n":"All State Auto Insurance","d":"Dec 30","a":252.47,"apr":0,"h":false}]},{"mo":"January 2027","date":"Jan 01, 2027","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"Association","d":"Jan 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Jan 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Jan 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Jan 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Jan 01","a":500.0,"apr":0,"h":false},{"n":"Comcast","d":"Jan 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Jan 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Jan 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Jan 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Jan 07","a":197.0,"apr":0,"h":false},{"n":"Capital One 4417","d":"Jan 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Jan 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Jan 10","a":275.0,"apr":27.49,"h":true}]},{"mo":"January 2027","date":"Jan 11, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,772 leftover \u2192 Citi Costco (22.74%)","b":[{"n":"Wells Fargo","d":"Jan 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Jan 11","a":106.64,"apr":0,"h":false},{"n":"PayPal","d":"Jan 13","a":100.0,"apr":0,"h":false}]},{"mo":"January 2027","date":"Jan 15, 2027","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,689 leftover \u2192 Citi Costco (22.74%)","b":[{"n":"Tehmina Life Insurance","d":"Jan 16","a":61.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Jan 16","a":73.17,"apr":0,"h":false},{"n":"Chase Disney","d":"Jan 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"January 2027","date":"Jan 25, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,783 leftover \u2192 Citi Costco \u2014 BIG PAYMENT!","b":[{"n":"Parking Cash","d":"Jan 25","a":100.0,"apr":0,"h":false},{"n":"Citi Bank","d":"Jan 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Jan 27","a":113.05,"apr":0,"h":false}]},{"mo":"January 2027","date":"Jan 29, 2027","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"All State Auto Insurance","d":"Jan 30","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Feb 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Feb 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Feb 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Feb 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Feb 01","a":500.0,"apr":0,"h":false},{"n":"Comcast","d":"Feb 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Feb 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Feb 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Feb 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Feb 07","a":197.0,"apr":0,"h":false}]},{"mo":"February 2027","date":"Feb 08, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,168 leftover \u2192 Citi Costco PAID OFF! Final stretch.","b":[{"n":"Capital One 4417","d":"Feb 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Feb 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Feb 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Feb 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Feb 11","a":106.64,"apr":0,"h":false}]},{"mo":"February 2027","date":"Feb 12, 2027","p":"Wife","net":2000,"sf":false,"tip":"\u26a1 $1,765 leftover \u2192 push final balances!","b":[{"n":"Tehmina Life Insurance","d":"Feb 16","a":61.0,"apr":0,"h":false},{"n":"PayPal","d":"Feb 13","a":100.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Feb 16","a":73.17,"apr":0,"h":false}]},{"mo":"February 2027","date":"Feb 22, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\u26a1 $2,771 leftover \u2192 credit cards almost cleared!","b":[{"n":"Parking Cash","d":"Feb 25","a":100.0,"apr":0,"h":false},{"n":"Chase Disney","d":"Feb 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"February 2027","date":"Feb 26, 2027","p":"Wife","net":2000,"sf":true,"tip":"","b":[{"n":"Citi Bank","d":"Feb 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Feb 27","a":113.05,"apr":0,"h":false},{"n":"All State Auto Insurance","d":"Feb 28","a":252.47,"apr":0,"h":false},{"n":"Association","d":"Mar 01","a":170.0,"apr":0,"h":false},{"n":"Donation","d":"Mar 01","a":100.0,"apr":0,"h":false},{"n":"Auto Loan","d":"Mar 01","a":468.61,"apr":2.7,"h":false},{"n":"Rent / Mortgage","d":"Mar 01","a":1047.46,"apr":2.87,"h":false},{"n":"Property Tax","d":"Mar 01","a":500.0,"apr":0,"h":false},{"n":"Comcast","d":"Mar 05","a":100.0,"apr":0,"h":false},{"n":"Water","d":"Mar 06","a":197.45,"apr":0,"h":false},{"n":"BOA","d":"Mar 06","a":100.0,"apr":0,"h":false},{"n":"Capital One 1887","d":"Mar 06","a":106.0,"apr":28.49,"h":true},{"n":"AT&T","d":"Mar 07","a":197.0,"apr":0,"h":false}]},{"mo":"March 2027","date":"Mar 08, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\ud83c\udf89 TARGET MONTH \u2014 Credit cards CLEARED!","b":[{"n":"Capital One 4417","d":"Mar 08","a":73.0,"apr":24.49,"h":true},{"n":"Citi Costco","d":"Mar 08","a":355.49,"apr":22.74,"h":true},{"n":"Chase Freedom","d":"Mar 10","a":275.0,"apr":27.49,"h":true},{"n":"Wells Fargo","d":"Mar 11","a":68.0,"apr":23.49,"h":true},{"n":"Inam Life Insurance","d":"Mar 11","a":106.64,"apr":0,"h":false}]},{"mo":"March 2027","date":"Mar 12, 2027","p":"Wife","net":2000,"sf":false,"tip":"\ud83c\udf89 Last push \u2014 redirect leftover to savings!","b":[{"n":"Tehmina Life Insurance","d":"Mar 16","a":61.0,"apr":0,"h":false},{"n":"PayPal","d":"Mar 13","a":100.0,"apr":0,"h":false},{"n":"Nicor Gas","d":"Mar 16","a":73.17,"apr":0,"h":false}]},{"mo":"March 2027","date":"Mar 22, 2027","p":"Muhammad","net":3047,"sf":false,"tip":"\ud83c\udf89 CREDIT CARDS PAID OFF! Redirect to savings!","b":[{"n":"Parking Cash","d":"Mar 25","a":100.0,"apr":0,"h":false},{"n":"Chase Disney","d":"Mar 23","a":176.0,"apr":26.49,"h":true}]},{"mo":"March 2027","date":"Mar 26, 2027","p":"Wife","net":2000,"sf":false,"tip":"\ud83c\udf89 FREEDOM! No more high-interest debt. Start saving every check!","b":[{"n":"Citi Bank","d":"Mar 27","a":50.0,"apr":0,"h":false},{"n":"ComEd","d":"Mar 27","a":113.05,"apr":0,"h":false},{"n":"All State Auto Insurance","d":"Mar 28","a":252.47,"apr":0,"h":false}]}];
-let filter='all',collapsed=false;
-const fmt=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-function render(){
-  const feed=document.getElementById('feed');
-  const list=C.filter(c=>{
-    if(filter==='shortfall') return c.sf;
-    if(filter==='highcredit') return c.b.some(x=>x.h);
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv1yMMmyrTbWbz0fSah10me9ZUucytGjVtEPK125AwJTp-HsZchBojFlakjodi9itRf5ZaDCroBU8x/pub?gid=1655141454&single=true&output=csv';
+
+// ── EXACT PAYCHECK DATES ──
+const MUH_CHECKS = [
+  '2026-06-15','2026-06-29','2026-07-13','2026-07-27',
+  '2026-08-10','2026-08-24','2026-09-07','2026-09-21',
+  '2026-10-05','2026-10-19','2026-11-02','2026-11-16',
+  '2026-11-30','2026-12-14','2026-12-28','2027-01-11',
+  '2027-01-25','2027-02-08','2027-02-22','2027-03-08','2027-03-22'
+].map(s=>new Date(s+'T12:00:00'));
+
+const WIFE_CHECKS = [
+  '2026-06-05','2026-06-19','2026-07-03','2026-07-17','2026-07-31',
+  '2026-08-14','2026-08-28','2026-09-11','2026-09-25',
+  '2026-10-09','2026-10-23','2026-11-06','2026-11-20',
+  '2026-12-04','2026-12-18','2027-01-01','2027-01-15',
+  '2027-01-29','2027-02-12','2027-02-26','2027-03-12','2027-03-26'
+].map(s=>new Date(s+'T12:00:00'));
+
+const ALL_CHECKS = [
+  ...MUH_CHECKS.map(d=>({d, p:'Muhammad', net:3047})),
+  ...WIFE_CHECKS.map(d=>({d, p:'Wife', net:2000}))
+].sort((a,b)=>a.d-b.d);
+
+const HIGH_APR = {'Capital One 1887':28.49,'Chase Freedom':27.49,'Chase Diseny':26.49,'Chase Disney':26.49,'Capital One 4417':24.49,'Wells Fargo':23.49,'Citi Costco':22.74};
+
+const AVALANCHE_TARGETS = [
+  {until:'2026-07-31', target:'Capital One 1887 (28.49%)'},
+  {until:'2026-09-15', target:'Chase Freedom (27.49%)'},
+  {until:'2026-10-20', target:'Chase Disney (26.49%)'},
+  {until:'2026-12-10', target:'Capital One 4417 (24.49%)'},
+  {until:'2027-01-05', target:'Wells Fargo (23.49%)'},
+  {until:'2027-03-31', target:'Citi Costco (22.74%)'},
+];
+
+function getAvalancheTarget(checkDate) {
+  for (const t of AVALANCHE_TARGETS) {
+    if (checkDate <= new Date(t.until+'T12:00:00')) return t.target;
+  }
+  return 'savings — you are DEBT FREE! 🎉';
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch==='"') inQ=!inQ;
+      else if (ch===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+      else cur+=ch;
+    }
+    vals.push(cur.trim());
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=vals[i]||'');
+    return obj;
+  }).filter(r=>r['Bill / Card Name'] && r['Bill / Card Name'].trim());
+}
+
+function parseDate(s) {
+  if (!s) return null;
+  s = s.replace(/"/g,'').trim();
+  // Handle M/D/YYYY or MM/DD/YYYY
+  const parts = s.split('/');
+  if (parts.length === 3) {
+    const [m,d,y] = parts;
+    return new Date(`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T12:00:00`);
+  }
+  return new Date(s+'T12:00:00');
+}
+
+function addMonths(d, n) {
+  const r = new Date(d);
+  r.setMonth(r.getMonth()+n);
+  // Clamp to last day of month
+  const lastDay = new Date(r.getFullYear(), r.getMonth()+1, 0).getDate();
+  if (r.getDate() > lastDay) r.setDate(lastDay);
+  return r;
+}
+
+function getMonthlyDues(firstDue, end) {
+  const dues = [];
+  let d = new Date(firstDue);
+  while (d <= end) {
+    dues.push(new Date(d));
+    d = addMonths(d, 1);
+  }
+  return dues;
+}
+
+function findBestCheck(dueDate) {
+  let best = null;
+  for (const c of ALL_CHECKS) {
+    if (c.d <= dueDate) best = c;
+    else break;
+  }
+  return best;
+}
+
+function moLabel(d) {
+  return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+}
+
+function fmt(n) {
+  return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+let SCHEDULE = [];
+let currentFilter = 'all';
+let collapsed = false;
+
+function buildSchedule(bills) {
+  const END = new Date('2027-03-31T12:00:00');
+  const assignments = new Map();
+
+  // Always include Wife Jun 5 even if no bills
+  assignments.set('2026-06-05', {check: ALL_CHECKS.find(c=>c.d.toISOString().startsWith('2026-06-05')), items:[]});
+
+  for (const bill of bills) {
+    const name = bill['Bill / Card Name'].trim();
+    const minPay = parseFloat((bill['Min Payment ($)']||'0').replace(/[$,]/g,'')) || 0;
+    const apr = parseFloat((bill['APR (%)']||'0').replace('%','')) || 0;
+    const isHigh = !!(HIGH_APR[name] || (apr >= 22));
+    const firstDueRaw = bill['Actual Due Date'];
+    if (!firstDueRaw || !minPay) continue;
+    const firstDue = parseDate(firstDueRaw);
+    if (!firstDue || isNaN(firstDue)) continue;
+
+    const dues = getMonthlyDues(firstDue, END);
+    for (const due of dues) {
+      const best = findBestCheck(due);
+      if (!best) continue;
+      const key = best.d.toISOString().split('T')[0];
+      if (!assignments.has(key)) assignments.set(key, {check: best, items:[]});
+      assignments.get(key).items.push({
+        n: name,
+        d: due.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+        a: minPay,
+        apr: apr,
+        h: isHigh
+      });
+    }
+  }
+
+  // Convert to sorted array
+  SCHEDULE = Array.from(assignments.entries())
+    .sort((a,b)=>new Date(a[0])-new Date(b[0]))
+    .map(([key, val]) => {
+      const {check, items} = val;
+      const net = check.net;
+      const tot = items.reduce((s,x)=>s+x.a,0);
+      const left = net - tot;
+      const target = getAvalancheTarget(check.d);
+      const tip = items.length === 0
+        ? `⚡ No bills due — send the ENTIRE ${fmt(net)} → ${target}`
+        : left > 0
+          ? `⚡ ${fmt(left)} leftover → ${target}`
+          : '';
+      return {
+        mo: moLabel(check.d),
+        date: check.d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+        p: check.p,
+        net,
+        sf: left < 0,
+        tip,
+        b: items
+      };
+    });
+}
+
+function render() {
+  const feed = document.getElementById('feed');
+  const list = SCHEDULE.filter(c => {
+    if (currentFilter==='shortfall') return c.sf;
+    if (currentFilter==='highcredit') return c.b.some(x=>x.h);
     return true;
   });
-  if(!list.length){feed.innerHTML='<div class="empty">No results.</div>';return;}
-  let html='',lastMo='';
-  list.forEach(c=>{
-    if(c.mo!==lastMo){html+=`<div class="mdiv">${c.mo}</div>`;lastMo=c.mo;}
+
+  if (!list.length) { feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">No results.</div>'; return; }
+
+  let html='', lastMo='';
+  list.forEach(c => {
+    if (c.mo!==lastMo) {
+      html+=`<div class="mdiv" data-mo="${c.mo}">${c.mo}</div>`;
+      lastMo=c.mo;
+    }
     const tot=c.b.reduce((s,x)=>s+x.a,0);
     const left=c.net-tot;
     const isMuh=c.p==='Muhammad';
     const bc=c.sf?'sf':(isMuh?'mc':'wc');
     const rows=c.b.length===0
-      ? `<div class="nobills">No bills due — entire check available for debt payoff.</div>`
-      : c.b.map(x=>{
-          const dot=x.h?'#b52a2a':(isMuh?'#3b2fd0':'#0a7a4a');
-          const apr=x.h?`<span class="at">${x.apr}%</span>`:'';
-          return `<div class="brow"><div class="bd" style="background:${dot}"></div><div class="bn">${x.n}</div><div class="bdue">${x.d}</div>${apr}<div class="ba">${fmt(x.a)}</div></div>`;
-        }).join('');
+      ?`<div class="nobills">No bills due — full check goes to debt payoff.</div>`
+      :c.b.map(x=>{
+        const dot=x.h?'#b52a2a':(isMuh?'#3b2fd0':'#0a7a4a');
+        const apr=x.h?`<span class="at">${x.apr}%</span>`:'';
+        return `<div class="brow"><div class="bd" style="background:${dot}"></div><div class="bn">${x.n}</div><div class="bdue">${x.d}</div>${apr}<div class="ba">${fmt(x.a)}</div></div>`;
+      }).join('');
+    const totRow=c.b.length>0
+      ?`<div class="trow"><div class="tl">Bills: <span class="tb">${fmt(tot)}</span></div><div style="text-align:right"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Leftover</div><div class="tleft ${left>=0?'pos':'neg'}">${left>=0?'+':''}${fmt(left)}</div></div></div>`
+      :`<div class="trow"><div class="tl">No bills</div><div class="tleft pos">+${fmt(c.net)}</div></div>`;
     const tip=c.sf
-      ?`<div class="sfail">⚠ Shortfall ${fmt(Math.abs(left))} — month-start bills exceed Wife check. Cover from previous Muhammad leftover or savings.</div>`
+      ?`<div class="sfail">⚠ Shortfall ${fmt(Math.abs(left))} — month-start bills exceed Wife check. Cover from previous Muhammad leftover.</div>`
       :(c.tip?`<div class="avl">${c.tip}</div>`:'');
-    const totRow=c.b.length>0?`<div class="trow">
-          <div class="tl">Bills: <span class="tb">${fmt(tot)}</span></div>
-          <div style="text-align:right">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Leftover</div>
-            <div class="tleft ${left>=0?'pos':'neg'}">${left>=0?'+':''}${fmt(left)}</div>
-          </div>
-        </div>`:`<div class="trow"><div class="tl">No bills</div><div class="tleft pos">+${fmt(c.net)}</div></div>`;
     html+=`<div class="pcheck ${bc}">
       <div class="chdr" onclick="this.parentElement.classList.toggle('collapsed')">
         <span class="pb ${isMuh?'mb':'wb'}">${c.p}</span>
@@ -138,29 +369,91 @@ function render(){
         <span class="cn ${isMuh?'m':'w'}">${fmt(c.net)}</span>
         <i class="ti ti-chevron-down chv" aria-hidden="true"></i>
       </div>
-      <div class="cbody">
-        ${rows}
-        ${totRow}
-        ${tip}
-      </div>
+      <div class="cbody">${rows}${totRow}${tip}</div>
     </div>`;
   });
   feed.innerHTML=html;
+  if(collapsed) document.querySelectorAll('.pcheck').forEach(c=>c.classList.add('collapsed'));
 }
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  document.getElementById('subText').textContent='Fetching from Google Sheets...';
+
+  try {
+    const resp = await fetch(CSV_URL);
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    const text = await resp.text();
+    const bills = parseCSV(text);
+    buildSchedule(bills);
+
+    // Update total min
+    const totalMin = bills.reduce((s,b)=>{
+      const v=parseFloat((b['Min Payment ($)']||'0').replace(/[$,]/g,''))||0;
+      return s+v;
+    },0);
+    document.getElementById('totalMin').textContent=fmt(totalMin);
+
+    const now = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    document.getElementById('lastupdated').textContent='Last updated: '+now;
+    document.getElementById('subText').textContent='Live · Jun 2026 → Mar 2027';
+    render();
+  } catch(e) {
+    document.getElementById('feed').innerHTML=`<div class="errmsg">
+      <strong>Could not load data from Google Sheets.</strong><br><br>
+      Make sure your Bills sheet is published as CSV (File → Share → Publish to web → Bills → CSV).<br><br>
+      Error: ${e.message}
+    </div>`;
+    document.getElementById('subText').textContent='Error loading data';
+  }
+  btn.classList.remove('spinning');
+}
+
 function toggleAll(){
   collapsed=!collapsed;
   document.querySelectorAll('.pcheck').forEach(c=>collapsed?c.classList.add('collapsed'):c.classList.remove('collapsed'));
   document.getElementById('toggleBtn').textContent=collapsed?'Expand All':'Collapse All';
 }
+
+// Jump bar
+document.querySelectorAll('.jbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const mo=b.dataset.mo;
+    const divs=document.querySelectorAll('.mdiv');
+    for(const d of divs){
+      if(d.dataset.mo===mo){
+        const hdrH=document.querySelector('.header').offsetHeight+document.getElementById('jumpbar').offsetHeight;
+        window.scrollTo({top:d.getBoundingClientRect().top+window.scrollY-hdrH-8,behavior:'smooth'});
+        document.querySelectorAll('.jbtn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        return;
+      }
+    }
+  });
+});
+
+// Scroll spy
+window.addEventListener('scroll',()=>{
+  const divs=document.querySelectorAll('.mdiv');
+  const hdrH=document.querySelector('.header').offsetHeight+document.getElementById('jumpbar').offsetHeight+20;
+  let current='';
+  divs.forEach(d=>{if(d.getBoundingClientRect().top<=hdrH)current=d.dataset.mo;});
+  document.querySelectorAll('.jbtn').forEach(b=>b.classList.toggle('active',b.dataset.mo===current));
+},{passive:true});
+
+// Filters
 document.querySelectorAll('.ftab').forEach(b=>{
   b.addEventListener('click',()=>{
     document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
-    filter=b.dataset.filter;
+    currentFilter=b.dataset.filter;
     render();
   });
 });
-render();
+
+// Load on page open
+loadData();
 </script>
 </body>
 </html>
