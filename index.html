@@ -154,7 +154,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <script>
 // ── CONFIG ──
-const WORKER_URL = 'https://paysync-proxy.muhammadinam9.workers.dev/';
+const WORKER_URL   = 'https://paysync-proxy.muhammadinam9.workers.dev/';
+const SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbz70_3i7tj0Hwwvytq2nACxaCB5f8nkvgfuUuBxiQmJI7fjftCZHIhC6v34ETtuhn7yAA/exec';
 
 // ── PAYCHECK DATES (exact from your spreadsheet) ──
 const ALL_CHECKS = [
@@ -329,28 +330,65 @@ function rowsToBills(rows){
   }).filter(Boolean);
 }
 
+
+// ── JSONP fetch (bypasses CORS for GET requests) ──
+function fetchJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'paysync_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('JSONP timeout'));
+    }, 10000);
+
+    window[cbName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.src = url + '?callback=' + cbName + '&t=' + Date.now();
+    script.onerror = () => { cleanup(); reject(new Error('JSONP script error')); };
+    document.head.appendChild(script);
+  });
+}
+
 async function loadData(){
   const btn=document.getElementById('refreshBtn');
   btn.classList.add('spinning');
   document.getElementById('subText').textContent='Fetching from Google Sheets...';
 
   try{
-    // Fetch from Cloudflare Worker — clean JSON, no CORS issues
-    const resp=await fetch(WORKER_URL+'?t='+Date.now());
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const json=await resp.json();
-    console.log('=== WORKER RESPONSE ===');
-    console.log('status:', json.status);
-    console.log('count:', json.count);
-    console.log('bills length:', json.bills ? json.bills.length : 'null');
-    if(json.bills && json.bills[0]) {
-      console.log('First bill keys:', Object.keys(json.bills[0]));
-      console.log('First bill:', JSON.stringify(json.bills[0]));
-      console.log('Actual Due Date value:', json.bills[0]['Actual Due Date']);
+    // Try Worker first, fall back to JSONP direct to Apps Script
+    let json = null;
+    
+    // Attempt 1: Cloudflare Worker
+    try {
+      const resp = await fetch(WORKER_URL + '?t=' + Date.now());
+      if (resp.ok) {
+        const j = await resp.json();
+        if (j.status === 'ok' && j.bills && j.bills.length > 0) {
+          json = j;
+          console.log('✅ Worker: got', j.bills.length, 'bills');
+        }
+      }
+    } catch(e) { console.warn('Worker failed:', e.message); }
+
+    // Attempt 2: JSONP directly to Apps Script (no CORS needed)
+    if (!json) {
+      console.log('Trying JSONP fallback...');
+      json = await fetchJSONP(SCRIPT_URL);
     }
-    if(json.status==='error') throw new Error(json.message);
-    const bills=json.bills;
-    if(!bills||!bills.length) throw new Error('No bill data returned from Worker');
+
+    if (!json || json.status === 'error') throw new Error(json ? json.message : 'All fetch methods failed');
+    const bills = json.bills;
+    if (!bills || !bills.length) throw new Error('No bill data returned');
+    console.log('✅ Got', bills.length, 'bills. First due date:', bills[0]['Actual Due Date']);
 
     const totalMin=bills.reduce((s,b)=>s+(parseFloat((b['Min Payment ($)']||'0').replace(/[$,]/g,''))||0),0);
     document.getElementById('totalMin').textContent=fmt(totalMin);
@@ -494,33 +532,39 @@ async function savePaid() {
   document.getElementById('mSaving').style.display = 'block';
 
   try {
-    const resp = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        billName:   currentBill,
-        datePaid:   date,
-        amountPaid: amount,
-        note:       note
-      })
+    // Try Worker for POST, fall back to direct Apps Script GET with params
+    let resp;
+    const postBody = JSON.stringify({
+      billName: currentBill, datePaid: date, amountPaid: amount, note: note
     });
+    
+    try {
+      resp = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: postBody,
+      });
+    } catch(e) {
+      // Fallback: send as GET params to Apps Script (JSONP)
+      const params = new URLSearchParams({
+        action: 'markPaid',
+        billName: currentBill,
+        datePaid: date,
+        amountPaid: amount,
+        note: note
+      });
+      const jsonpResp = await fetchJSONP(SCRIPT_URL + '?' + params.toString());
+      if (jsonpResp && jsonpResp.status === 'ok') {
+        handlePaySuccess(jsonpResp);
+        return;
+      }
+      throw new Error('Both Worker and direct Script failed');
+    }
 
     const result = await resp.json();
 
     if (result.status === 'ok') {
-      // Mark button as paid
-      const btnId = 'mpb-' + currentBill.replace(/[^a-z0-9]/gi, '_');
-      const btn = document.getElementById(btnId);
-      if (btn) { btn.textContent = '✓ Paid'; btn.classList.add('paid'); }
-
-      closeModal();
-
-      // Show success toast
-      showToast('✅ ' + currentBill + ' marked paid! New due: ' + result.newDueDate);
-
-      // Auto-refresh schedule after 2 seconds
-      setTimeout(() => loadData(), 2000);
-
+      handlePaySuccess(result);
     } else {
       throw new Error(result.message || 'Unknown error');
     }
@@ -530,6 +574,16 @@ async function savePaid() {
     document.getElementById('mSaveBtn').disabled = false;
     document.getElementById('mSaving').style.display = 'none';
   }
+}
+
+
+function handlePaySuccess(result) {
+  const btnId = 'mpb-' + currentBill.replace(/[^a-z0-9]/gi, '_');
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '✓ Paid'; btn.classList.add('paid'); }
+  closeModal();
+  showToast('✅ ' + currentBill + ' marked paid! New due: ' + result.newDueDate);
+  setTimeout(() => loadData(), 2000);
 }
 
 function showToast(msg) {
