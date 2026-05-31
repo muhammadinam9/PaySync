@@ -134,8 +134,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <script>
 // ── CONFIG ──
-const SHEET_ID = '10BHf_je_cT247F6LbTqjctF_QWCE35uVym0wI5Ysqp4';
-const GID      = '1655141454';
+const WORKER_URL = 'https://paysync-proxy.muhammadinam9.workers.dev/';
 
 // ── PAYCHECK DATES (exact from your spreadsheet) ──
 const ALL_CHECKS = [
@@ -286,20 +285,17 @@ async function loadData(){
   document.getElementById('subText').textContent='Fetching from Google Sheets...';
 
   try{
-    // Use gviz tq endpoint — works from browsers without CORS issues
-    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}&t=${Date.now()}`;
-    const resp=await fetch(url);
+    // Fetch from Cloudflare Worker — clean JSON, no CORS issues
+    const resp=await fetch(WORKER_URL+'?t='+Date.now());
     if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const text=await resp.text();
-    if(!text.includes('google.visualization')) throw new Error('Unexpected response format');
+    const json=await resp.json();
+    if(json.status==='error') throw new Error(json.message);
+    const bills=json.bills;
+    if(!bills||!bills.length) throw new Error('No bill data returned from Worker');
 
-    const rows=parseGviz(text);
-    const bills=rowsToBills(rows);
-    if(!bills.length) throw new Error('No bill data found in sheet');
-
-    const totalMin=bills.reduce((s,b)=>s+b.a,0);
+    const totalMin=bills.reduce((s,b)=>s+(parseFloat((b['Min Payment ($)']||'0').replace(/[$,]/g,''))||0),0);
     document.getElementById('totalMin').textContent=fmt(totalMin);
-    buildSchedule(bills);
+    buildSchedule(rowsToBills(bills));
 
     const now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
     document.getElementById('lastUpdated').textContent='Live data · Last fetched: '+now;
