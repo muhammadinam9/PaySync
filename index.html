@@ -319,6 +319,15 @@ async function loadData(){
     const resp=await fetch(WORKER_URL+'?t='+Date.now());
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     const json=await resp.json();
+    console.log('=== WORKER RESPONSE ===');
+    console.log('status:', json.status);
+    console.log('count:', json.count);
+    console.log('bills length:', json.bills ? json.bills.length : 'null');
+    if(json.bills && json.bills[0]) {
+      console.log('First bill keys:', Object.keys(json.bills[0]));
+      console.log('First bill:', JSON.stringify(json.bills[0]));
+      console.log('Actual Due Date value:', json.bills[0]['Actual Due Date']);
+    }
     if(json.status==='error') throw new Error(json.message);
     const bills=json.bills;
     if(!bills||!bills.length) throw new Error('No bill data returned from Worker');
