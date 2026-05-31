@@ -382,6 +382,74 @@ function render() {
   if(collapsed) document.querySelectorAll('.pcheck').forEach(c=>c.classList.add('collapsed'));
 }
 
+
+function buildStaticFallback() {
+  // Static snapshot from your Google Sheet — used when live fetch fails
+  const STATIC_BILLS = [
+    {name:'Tehmina Life Insurance', due:'2026-06-16', min:61.00,   apr:0,     high:false},
+    {name:'Parking Cash',           due:'2026-06-25', min:100.00,  apr:0,     high:false},
+    {name:'Citi Bank',              due:'2026-06-27', min:50.00,   apr:0,     high:false},
+    {name:'ComEd',                  due:'2026-06-27', min:113.05,  apr:0,     high:false},
+    {name:'All State Auto Insurance',due:'2026-06-30',min:252.47,  apr:0,     high:false},
+    {name:'Association',            due:'2026-07-01', min:170.00,  apr:0,     high:false},
+    {name:'Donation',               due:'2026-07-01', min:100.00,  apr:0,     high:false},
+    {name:'Auto Loan',              due:'2026-07-01', min:468.61,  apr:2.7,   high:false},
+    {name:'Rent / Mortgage',        due:'2026-07-01', min:1047.46, apr:2.87,  high:false},
+    {name:'Property Tax',           due:'2026-07-01', min:500.00,  apr:0,     high:false},
+    {name:'Comcast',                due:'2026-07-05', min:100.00,  apr:0,     high:false},
+    {name:'Water',                  due:'2026-07-06', min:197.45,  apr:0,     high:false},
+    {name:'BOA',                    due:'2026-07-06', min:100.00,  apr:0,     high:false},
+    {name:'Capital One 1887',       due:'2026-07-06', min:106.00,  apr:28.49, high:true},
+    {name:'AT&T',                   due:'2026-07-07', min:197.00,  apr:0,     high:false},
+    {name:'Capital One 4417',       due:'2026-07-08', min:73.00,   apr:24.49, high:true},
+    {name:'Citi Costco',            due:'2026-07-08', min:355.49,  apr:22.74, high:true},
+    {name:'Chase Freedom',          due:'2026-07-10', min:275.00,  apr:27.49, high:true},
+    {name:'Wells Fargo',            due:'2026-07-11', min:68.00,   apr:23.49, high:true},
+    {name:'Inam Life Insurance',    due:'2026-07-11', min:106.64,  apr:0,     high:false},
+    {name:'PayPal',                 due:'2026-07-13', min:100.00,  apr:0,     high:false},
+    {name:'Nicor Gas',              due:'2026-07-16', min:73.17,   apr:0,     high:false},
+    {name:'Chase Disney',           due:'2026-07-23', min:176.00,  apr:26.49, high:true},
+  ];
+
+  const END = new Date('2027-03-31T12:00:00');
+  const assignments = new Map();
+  assignments.set('2026-06-05', {check: ALL_CHECKS.find(c=>c.d.toISOString().startsWith('2026-06-05')), items:[]});
+
+  for (const bill of STATIC_BILLS) {
+    const firstDue = new Date(bill.due + 'T12:00:00');
+    const dues = getMonthlyDues(firstDue, END);
+    for (const due of dues) {
+      const best = findBestCheck(due);
+      if (!best) continue;
+      const key = best.d.toISOString().split('T')[0];
+      if (!assignments.has(key)) assignments.set(key, {check: best, items:[]});
+      assignments.get(key).items.push({
+        n: bill.name,
+        d: due.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+        a: bill.min, apr: bill.apr, h: bill.high
+      });
+    }
+  }
+
+  SCHEDULE = Array.from(assignments.entries())
+    .sort((a,b)=>new Date(a[0])-new Date(b[0]))
+    .map(([key, val]) => {
+      const {check, items} = val;
+      const net = check.net;
+      const tot = items.reduce((s,x)=>s+x.a,0);
+      const left = net - tot;
+      const target = getAvalancheTarget(check.d);
+      const tip = items.length === 0
+        ? `⚡ No bills due — send the ENTIRE ${fmt(net)} → ${target}`
+        : left > 0 ? `⚡ ${fmt(left)} leftover → ${target}` : '';
+      return { mo: moLabel(check.d), date: check.d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), p: check.p, net, sf: left<0, tip, b: items };
+    });
+
+  document.getElementById('subText').textContent = '⚠ Showing cached data (live fetch failed)';
+  document.getElementById('lastupdated').textContent = 'Using static snapshot — update your sheet and hit Refresh to get live data';
+  render();
+}
+
 async function loadData() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
@@ -415,11 +483,15 @@ async function loadData() {
     document.getElementById('subText').textContent='Live · Jun 2026 → Mar 2027';
     render();
   } catch(e) {
+    // Show friendly error with fallback static data
     document.getElementById('feed').innerHTML=`<div class="errmsg">
-      <strong>Could not load data from Google Sheets.</strong><br><br>
-      Make sure your Bills sheet is published as CSV (File → Share → Publish to web → Bills → CSV).<br><br>
-      Error: ${e.message}
+      <strong>⚠ Could not load live data.</strong><br><br>
+      <strong>If you are viewing this on GitHub Pages</strong> — try the Refresh button. The proxy may be temporarily unavailable.<br><br>
+      <strong>If you are previewing inside Claude.ai</strong> — this is expected. Claude's preview sandbox blocks external requests. Upload to GitHub and it will work correctly.<br><br>
+      <small style="opacity:.7">Error: ${e.message}</small>
     </div>`;
+    // Load static fallback
+    buildStaticFallback();
     document.getElementById('subText').textContent='Error loading data';
   }
   btn.classList.remove('spinning');
