@@ -158,7 +158,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 </div>
 
 <script>
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv1yMMmyrTbWbz0fSah10me9ZUucytGjVtEPK125AwJTp-HsZchBojFlakjodi9itRf5ZaDCroBU8x/pub?gid=1655141454&single=true&output=csv';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSv1yMMmyrTbWbz0fSah10me9ZUucytGjVtEPK125AwJTp-HsZchBojFlakjodi9itRf5ZaDCroBU8x/pub?gid=1655141454&single=true&output=csv';
+// Try multiple CORS proxies in order — if one fails, try the next
+const PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
 // ── EXACT PAYCHECK DATES ──
 const MUH_CHECKS = [
@@ -382,9 +388,18 @@ async function loadData() {
   document.getElementById('subText').textContent='Fetching from Google Sheets...';
 
   try {
-    const resp = await fetch(CSV_URL);
-    if (!resp.ok) throw new Error('HTTP '+resp.status);
-    const text = await resp.text();
+    let text = null;
+    let lastErr = '';
+    for (const proxyFn of PROXIES) {
+      try {
+        const resp = await fetch(proxyFn(SHEET_URL));
+        if (!resp.ok) throw new Error('HTTP '+resp.status);
+        text = await resp.text();
+        if (text && text.includes('Bill / Card Name')) break; // valid CSV
+        text = null;
+      } catch(e) { lastErr = e.message; }
+    }
+    if (!text) throw new Error('All proxies failed. Last error: ' + lastErr);
     const bills = parseCSV(text);
     buildSchedule(bills);
 
