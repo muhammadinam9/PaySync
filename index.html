@@ -8,407 +8,161 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
-  // ── MARK PAID MODAL ──
-  let currentModalBill = '';
-  let currentModalBtnId = '';
-  const payments = [];
-
-  function openModal(billName, btnId) {
-    currentModalBill = billName;
-    currentModalBtnId = btnId || '';
-    document.getElementById('modalBillName').textContent = billName;
-    document.getElementById('modalBillSub').textContent = 'Enter payment details for this bill';
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('modalDate').value = today;
-    document.getElementById('modalAmount').value = '';
-    document.getElementById('modalNote').value = '';
-    document.getElementById('modalBackdrop').classList.add('open');
-  }
-
-  function closeModal() {
-    document.getElementById('modalBackdrop').classList.remove('open');
-  }
-
-  function closeModalBackdrop(e) {
-    if (e.target === document.getElementById('modalBackdrop')) closeModal();
-  }
-
-  function savePaid() {
-    const date = document.getElementById('modalDate').value;
-    const amount = parseFloat(document.getElementById('modalAmount').value) || 0;
-    const note = document.getElementById('modalNote').value.trim();
-
-    if (!date) { alert('Please enter the date paid.'); return; }
-    if (amount <= 0) { alert('Please enter the amount paid.'); return; }
-
-    const entry = { bill: currentModalBill, date, amount, note };
-    payments.unshift(entry);
-    renderHistory();
-
-    // Mark the button as paid
-    const btns = document.querySelectorAll('.mark-paid-btn');
-    btns.forEach(b => {
-      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(currentModalBill.replace(/'/g, "\'"))) {
-        b.textContent = '✓ Paid';
-        b.classList.add('paid');
-      }
-    });
-
-    closeModal();
-  }
-
-  function renderHistory() {
-    const list = document.getElementById('histList');
-    const empty = document.getElementById('histEmpty');
-    const summCard = document.getElementById('histSummaryCard');
-    const histTotal = document.getElementById('histTotal');
-    const histCount = document.getElementById('histCount');
-
-    if (payments.length === 0) {
-      empty.style.display = 'block';
-      list.innerHTML = '';
-      summCard.style.display = 'none';
-      return;
-    }
-
-    empty.style.display = 'none';
-    summCard.style.display = 'block';
-
-    const total = payments.reduce((s, p) => s + p.amount, 0);
-    histTotal.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    histCount.textContent = payments.length + ' payment' + (payments.length !== 1 ? 's' : '');
-
-    list.innerHTML = payments.map(p => {
-      const d = new Date(p.date + 'T00:00:00');
-      const dStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-      return `<div class="hist-item">
-        <div class="hist-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
-        <div style="flex:1; min-width:0;">
-          <div class="hist-name">${p.bill}</div>
-          <div class="hist-date">${dStr}${p.note ? ' · ' + p.note : ''}</div>
-        </div>
-        <div class="hist-amount">$${p.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-      </div>`;
-    }).join('');
-  }
-
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #f5f4f0;
-    --bg2: #ffffff;
-    --bg3: #eeecea;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-    --text: #1a1a24;
-    --text2: #3a3a4a;
-    --text3: #5a5a6e;
-    --accent: #3b2fd0;
-    --accent2: #3b2fd0;
-    --green: #0a7a4a;
-    --green2: #d1f5e8;
-    --red: #b52a2a;
-    --red2: #fde8e8;
-    --amber: #8a5500;
-    --amber2: #fef3db;
-    --blue: #1a4fc4;
-    --radius: 14px;
-    --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.5;
-    padding-bottom: 100px;
-  }
+:root {
+  --bg:      #f5f4f0;
+  --bg2:     #ffffff;
+  --bg3:     #eeecea;
+  --border:  rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text:    #1a1a24;
+  --text2:   #3a3a4a;
+  --text3:   #5a5a6e;
+  --accent:  #3b2fd0;
+  --green:   #0a7a4a;
+  --red:     #b52a2a;
+  --amber:   #8a5500;
+  --blue:    #1a4fc4;
+  --radius:  14px;
+  --rsm:     8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5;padding-bottom:90px;}
 
-  /* ── TOP HEADER ── */
-  .top-bar {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(245,244,240,0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid var(--border);
-    padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .top-bar .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-  .top-bar .logo span { color: var(--accent); }
-  .top-bar .date { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+/* TOP BAR */
+.top-bar{position:sticky;top:0;z-index:100;background:rgba(245,244,240,0.95);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:18px;font-weight:600;letter-spacing:-0.3px;color:var(--text);}
+.logo span{color:var(--accent);}
+.topdate{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
 
-  /* ── TABS ── */
-  .tabs {
-    display: flex; gap: 0;
-    background: var(--bg2);
-    border-bottom: 0.5px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: none;
-    padding: 12px 18px;
-    font-size: 13px; font-weight: 500;
-    color: var(--text3);
-    border: none; background: none;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-  }
-  .tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:none;padding:12px 16px;font-size:13px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-  /* ── SECTIONS ── */
-  .section { display: none; padding: 20px; }
-  .section.active { display: block; }
+/* SECTIONS */
+.section{display:none;padding:16px;}
+.section.active{display:block;}
 
-  /* ── CARDS ── */
-  .card {
-    background: var(--bg2);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  .card-title {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.8px;
-    text-transform: uppercase; color: var(--text3);
-    margin-bottom: 14px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .card-title i { font-size: 14px; }
+/* CARDS */
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.card-title i{font-size:14px;}
 
-  /* ── HERO METRICS ── */
-  .hero-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .metric {
-    background: var(--bg3);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    position: relative;
-  }
-  .metric .label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .metric .val { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
-  .metric .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .metric.full { grid-column: 1 / -1; }
-  .metric .badge {
-    position: absolute; top: 10px; right: 10px;
-    font-size: 10px; font-weight: 500; padding: 2px 7px;
-    border-radius: 20px;
-  }
-  .badge-green { background: rgba(62,207,142,0.15); color: var(--green); }
-  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
-  .badge-amber { background: rgba(251,191,36,0.15); color: var(--amber); }
+/* METRICS */
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.metric{background:var(--bg3);border-radius:var(--rsm);padding:14px;position:relative;}
+.metric .label{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.metric .val{font-size:22px;font-weight:600;letter-spacing:-.5px;font-family:'DM Mono',monospace;color:var(--text);}
+.metric .sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.metric.full{grid-column:1/-1;}
 
-  /* ── INCOME BAR ── */
-  .income-bar-wrap { margin: 6px 0 4px; }
-  .income-bar-track {
-    height: 6px; border-radius: 10px;
-    background: var(--bg3);
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .income-bar-fill {
-    height: 100%; border-radius: 10px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transition: width 0.8s ease;
-  }
-  .income-legend {
-    display: flex; justify-content: space-between;
-    font-size: 11px; color: var(--text3);
-  }
+/* INCOME BAR */
+.inc-track{height:6px;border-radius:10px;background:var(--bg3);overflow:hidden;margin:10px 0 6px;}
+.inc-fill{height:100%;border-radius:10px;background:var(--accent);}
+.inc-legend{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
 
-  /* ── COVERAGE RING ── */
-  .coverage-wrap {
-    display: flex; align-items: center; gap: 18px;
-    padding: 6px 0;
-  }
-  .ring-svg { flex-shrink: 0; }
-  .coverage-detail { flex: 1; }
-  .coverage-row {
-    display: flex; justify-content: space-between;
-    font-size: 13px; padding: 4px 0;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .coverage-row:last-child { border-bottom: none; }
-  .coverage-row .key { color: var(--text2); }
-  .coverage-row .money { font-family: 'DM Mono', monospace; font-size: 13px; }
-  .coverage-row .money.pos { color: var(--green); }
-  .coverage-row .money.neg { color: var(--red); }
+/* COVERAGE RING */
+.ring-wrap{display:flex;align-items:center;gap:16px;}
+.cov-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:0.5px solid var(--border);}
+.cov-row:last-child{border-bottom:none;}
+.cov-key{color:var(--text2);}
+.cov-val{font-family:'DM Mono',monospace;color:var(--text);}
+.cov-val.pos{color:var(--green);}
+.cov-val.neg{color:var(--red);}
 
-  /* ── BILLS LIST ── */
-  .bill-item {
-    display: flex; align-items: center;
-    padding: 13px 0;
-    border-bottom: 0.5px solid var(--border);
-    gap: 12px;
-  }
-  .bill-item:last-child { border-bottom: none; }
-  .bill-icon {
-    width: 38px; height: 38px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; flex-shrink: 0;
-  }
-  .bill-info { flex: 1; min-width: 0; }
-  .bill-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bill-due { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .bill-amount { text-align: right; flex-shrink: 0; }
-  .bill-amount .min { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
-  .bill-amount .bal { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .urgency-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-  }
+/* BILL ITEMS */
+.bill-item{display:flex;align-items:flex-start;padding:12px 0;border-bottom:0.5px solid var(--border);gap:10px;}
+.bill-item:last-child{border-bottom:none;}
+.udot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.bill-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.bill-info{flex:1;min-width:0;}
+.bill-name{font-size:14px;font-weight:500;color:var(--text);}
+.bill-due{font-size:11px;color:var(--text3);margin-top:1px;}
+.bill-right{text-align:right;flex-shrink:0;}
+.bill-min{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--text);}
+.bill-bal{font-size:11px;color:var(--text3);margin-top:1px;}
 
-  /* ── PAYOFF STRATEGY ── */
-  .payoff-item {
-    display: flex; gap: 12px;
-    padding: 13px 0;
-    border-bottom: 0.5px solid var(--border);
-    align-items: flex-start;
-  }
-  .payoff-item:last-child { border-bottom: none; }
-  .priority-badge {
-    font-size: 10px; font-weight: 600;
-    padding: 3px 8px; border-radius: 20px;
-    flex-shrink: 0; margin-top: 2px;
-    font-family: 'DM Mono', monospace;
-  }
-  .p1 { background: rgba(248,113,113,0.15); color: var(--red); }
-  .p2 { background: rgba(251,191,36,0.15); color: var(--amber); }
-  .p3 { background: rgba(96,165,250,0.15); color: var(--blue); }
-  .p-min { background: rgba(153,153,176,0.12); color: var(--text3); }
-  .payoff-body { flex: 1; min-width: 0; }
-  .payoff-name { font-size: 14px; font-weight: 500; }
-  .payoff-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
-  .payoff-meta strong { color: var(--red); }
-  .payoff-right { text-align: right; flex-shrink: 0; }
-  .payoff-bal { font-family: 'DM Mono', monospace; font-size: 14px; }
-  .payoff-interest { font-size: 11px; color: var(--text3); margin-top: 2px; }
+/* MARK PAID BUTTON */
+.mpbtn{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;margin-top:5px;display:inline-block;transition:all .2s;}
+.mpbtn:active{transform:scale(0.96);}
+.mpbtn.paid{background:rgba(10,122,74,0.1);border-color:rgba(10,122,74,0.3);color:var(--green);}
 
-  /* ── SCHEDULE ── */
-  .sched-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 0;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .sched-row:last-child { border-bottom: none; }
-  .sched-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .sched-date { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); flex-shrink: 0; width: 80px; }
-  .sched-who { font-size: 13px; font-weight: 500; flex: 1; }
-  .sched-amount { font-family: 'DM Mono', monospace; font-size: 14px; }
+/* PAYOFF */
+.payoff-item{display:flex;gap:10px;padding:12px 0;border-bottom:0.5px solid var(--border);align-items:flex-start;}
+.payoff-item:last-child{border-bottom:none;}
+.pbadge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;margin-top:2px;font-family:'DM Mono',monospace;}
+.p1{background:rgba(181,42,42,0.1);color:var(--red);}
+.p2{background:rgba(138,85,0,0.1);color:var(--amber);}
+.p3{background:rgba(26,79,196,0.1);color:var(--blue);}
+.pmin{background:rgba(90,90,110,0.08);color:var(--text3);}
+.pname{font-size:14px;font-weight:500;color:var(--text);}
+.pmeta{font-size:12px;color:var(--text2);margin-top:3px;}
+.pmeta strong{color:var(--red);}
+.pbal{font-family:'DM Mono',monospace;font-size:14px;color:var(--text);}
+.pint{font-size:11px;color:var(--text3);margin-top:2px;}
 
-  /* ── APR CHART SECTION ── */
-  .chart-wrap { margin-top: 10px; }
+/* PROGRESS BARS */
+.prog{margin-bottom:14px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--text);}
+.prog-pct{font-family:'DM Mono',monospace;color:var(--text2);}
+.prog-track{height:8px;border-radius:8px;background:var(--bg3);overflow:hidden;}
+.prog-fill{height:100%;border-radius:8px;}
+.prog-sub{font-size:11px;color:var(--text3);margin-top:3px;}
 
-  /* ── SMART PLAN ── */
-  .plan-note {
-    background: rgba(124,110,245,0.08);
-    border: 0.5px solid rgba(124,110,245,0.25);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    font-size: 13px;
-    color: var(--accent2);
-    margin-bottom: 14px;
-    line-height: 1.6;
-  }
-  .tip-box {
-    background: var(--bg3);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    margin-bottom: 10px;
-  }
-  .tip-box h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .tip-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+/* SCHEDULE */
+.sched-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.sched-row:last-child{border-bottom:none;}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sdate{font-family:'DM Mono',monospace;font-size:13px;color:var(--text2);flex-shrink:0;width:76px;}
+.swho{font-size:13px;font-weight:500;flex:1;color:var(--text);}
+.samt{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;}
 
-  /* ── BOTTOM NAV ── */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(245,244,240,0.97);
-    border-top: 0.5px solid var(--border);
-    display: flex;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
-  .nav-btn {
-    flex: 1;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 10px 0 14px;
-    border: none; background: none;
-    color: var(--text3);
-    font-size: 10px; font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s;
-    gap: 3px;
-  }
-  .nav-btn i { font-size: 20px; }
-  .nav-btn.active { color: var(--accent2); }
+/* PLAN */
+.plan-note{background:rgba(59,47,208,0.06);border:0.5px solid rgba(59,47,208,0.2);border-radius:var(--rsm);padding:12px 14px;font-size:13px;color:var(--accent);margin-bottom:12px;line-height:1.6;}
+.tip-box{background:var(--bg3);border-radius:var(--rsm);padding:14px;margin-bottom:10px;}
+.tip-box h4{font-size:13px;font-weight:600;margin-bottom:5px;color:var(--text);}
+.tip-box p{font-size:13px;color:var(--text2);line-height:1.6;}
 
-  /* ── PROGRESS BARS ── */
-  .prog-bar { margin-bottom: 14px; }
-  .prog-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
-  .prog-label .name { font-weight: 500; }
-  .prog-label .pct { font-family: 'DM Mono', monospace; color: var(--text2); }
-  .prog-track { height: 8px; border-radius: 8px; background: var(--bg3); overflow: hidden; }
-  .prog-fill { height: 100%; border-radius: 8px; }
-  .prog-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+/* HISTORY */
+.hist-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:0.5px solid var(--border);}
+.hist-item:last-child{border-bottom:none;}
+.hicon{width:34px;height:34px;border-radius:9px;background:rgba(10,122,74,0.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.hname{font-size:14px;font-weight:500;color:var(--text);}
+.hdate{font-size:11px;color:var(--text3);margin-top:1px;}
+.hamount{font-family:'DM Mono',monospace;font-weight:600;color:var(--green);font-size:14px;}
 
-  /* Utility */
-  .green { color: var(--green); }
-  .red { color: var(--red); }
-  .amber { color: var(--amber); }
-  .mono { font-family: 'DM Mono', monospace; }
-  .divider { height: 0.5px; background: var(--border); margin: 4px 0 16px; }
-  .section-gap { height: 20px; }
+/* MODAL */
+.modal-bd{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.35);align-items:flex-end;justify-content:center;}
+.modal-bd.open{display:flex;}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 40px;width:100%;max-width:480px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(80px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhandle{width:36px;height:4px;border-radius:4px;background:#ddd;margin:0 auto 18px;}
+.mtitle{font-size:17px;font-weight:600;color:#1a1a24;margin-bottom:3px;}
+.msub{font-size:13px;color:#5a5a6e;margin-bottom:18px;}
+.mfield{margin-bottom:13px;}
+.mlabel{font-size:12px;font-weight:600;color:#3a3a4a;margin-bottom:6px;letter-spacing:.4px;display:block;}
+.minput{width:100%;padding:12px 14px;border:1.5px solid #d8d6d2;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a1a24;background:#f9f8f5;outline:none;transition:border-color .2s,background .2s;}
+.minput:focus{border-color:#3b2fd0;background:#fff;}
+.mactions{display:flex;gap:10px;margin-top:18px;}
+.mbtn-cancel{flex:1;padding:14px;border-radius:12px;border:1.5px solid #d8d6d2;background:#f5f4f0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#3a3a4a;cursor:pointer;}
+.mbtn-save{flex:2;padding:14px;border-radius:12px;border:none;background:#3b2fd0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#fff;cursor:pointer;}
+.mbtn-save:active{background:#2a1fb0;}
 
-  /* ── MODAL ── */
-  .modal-backdrop {
-    display: none;
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.4);
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-backdrop.open { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 20px 20px 0 0;
-    padding: 24px 20px 36px;
-    width: 100%;
-    max-width: 480px;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(60px); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
-  .modal-handle { width: 36px; height: 4px; border-radius: 4px; background: #ddd; margin: 0 auto 20px; }
-  .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; color: #1a1a24; }
-  .modal-sub { font-size: 13px; color: #5a5a6e; margin-bottom: 20px; }
-  .modal-field { margin-bottom: 14px; }
-  .modal-label { font-size: 12px; font-weight: 600; color: #3a3a4a; margin-bottom: 6px; letter-spacing: 0.4px; display: block; }
-  .modal-input { width: 100%; padding: 11px 14px; border: 1.5px solid #dddbd6; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: #1a1a24; background: #f9f8f5; outline: none; }
-  .modal-input:focus { border-color: #3b2fd0; background: #fff; }
-  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-  .btn-cancel { flex: 1; padding: 13px; border-radius: 12px; border: 1.5px solid #dddbd6; background: #f5f4f0; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; color: #3a3a4a; cursor: pointer; }
-  .btn-save { flex: 2; padding: 13px; border-radius: 12px; border: none; background: #3b2fd0; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #fff; cursor: pointer; }
-  .mark-paid-btn { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; border: 1.5px solid #dddbd6; background: #fff; color: #5a5a6e; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; margin-top: 4px; display: inline-block; }
-  .mark-paid-btn.paid { background: rgba(10,122,74,0.1); border-color: rgba(10,122,74,0.25); color: #0a7a4a; }
-  .hist-item { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
-  .hist-item:last-child { border-bottom: none; }
-  .hist-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(10,122,74,0.1); color: #0a7a4a; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-  .hist-name { flex: 1; font-weight: 500; color: #1a1a24; }
-  .hist-date { font-size: 11px; color: #5a5a6e; }
-  .hist-amount { font-family: 'DM Mono', monospace; font-weight: 600; color: #0a7a4a; }
-  #histEmpty { text-align: center; padding: 30px 0; color: #9999b0; font-size: 13px; }
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(245,244,240,0.97);border-top:0.5px solid var(--border);display:flex;z-index:100;backdrop-filter:blur(12px);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 0 13px;border:none;background:none;color:var(--text3);font-size:10px;font-weight:500;cursor:pointer;gap:3px;font-family:'DM Sans',sans-serif;}
+.nav-btn i{font-size:20px;}
+.nav-btn.active{color:var(--accent);}
+
+/* UTILS */
+.red{color:var(--red);}
+.green{color:var(--green);}
+.amber{color:var(--amber);}
+.blue{color:var(--blue);}
 </style>
 </head>
 <body>
@@ -416,11 +170,11 @@
 <!-- TOP BAR -->
 <div class="top-bar">
   <div class="logo">Pay<span>Sync</span></div>
-  <div class="date" id="todayDate"></div>
+  <div class="topdate" id="todayDate"></div>
 </div>
 
 <!-- TABS -->
-<div class="tabs" id="tabBar">
+<div class="tabs">
   <button class="tab active" data-tab="dashboard">Dashboard</button>
   <button class="tab" data-tab="bills">Bills</button>
   <button class="tab" data-tab="payoff">Payoff</button>
@@ -429,12 +183,11 @@
   <button class="tab" data-tab="history">History</button>
 </div>
 
-<!-- ═══════════════════════════════════
-     TAB 1: DASHBOARD
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     DASHBOARD
+══════════════════════════════ -->
 <div class="section active" id="tab-dashboard">
 
-  <!-- Income Summary -->
   <div class="card">
     <div class="card-title"><i class="ti ti-home-dollar" aria-hidden="true"></i> Household Income</div>
     <div class="hero-grid">
@@ -448,916 +201,787 @@
         <div class="val">$4,160</div>
         <div class="sub">/ month net</div>
       </div>
-      <div class="metric full" style="background: rgba(124,110,245,0.08); border: 0.5px solid rgba(124,110,245,0.2);">
-        <div class="label" style="color: var(--accent2);">Combined Monthly</div>
-        <div class="val" style="color: var(--accent2); font-size: 28px;">$12,910</div>
-        <div class="income-bar-wrap">
-          <div class="income-bar-track">
-            <div class="income-bar-fill" style="width: 67.8%"></div>
-          </div>
-          <div class="income-legend">
-            <span>Muhammad 67.8%</span><span>Wife 32.2%</span>
-          </div>
-        </div>
+      <div class="metric full" style="background:rgba(59,47,208,0.06);border:0.5px solid rgba(59,47,208,0.15);">
+        <div class="label" style="color:var(--accent);">Combined Monthly</div>
+        <div class="val" style="color:var(--accent);font-size:28px;">$12,910</div>
+        <div class="inc-track"><div class="inc-fill" style="width:67.8%"></div></div>
+        <div class="inc-legend"><span>Muhammad 67.8%</span><span>Wife 32.2%</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Budget Coverage -->
   <div class="card">
     <div class="card-title"><i class="ti ti-chart-pie" aria-hidden="true"></i> Budget Coverage</div>
-    <div class="coverage-wrap">
-      <svg class="ring-svg" width="90" height="90" viewBox="0 0 90 90" role="img" aria-label="Coverage ring showing 37.1% of income goes to bills">
-        <circle cx="45" cy="45" r="36" fill="none" stroke="#dddbd6" stroke-width="10"/>
+    <div class="ring-wrap">
+      <svg width="90" height="90" viewBox="0 0 90 90" role="img" aria-label="37.1% of income goes to minimum payments" style="flex-shrink:0;">
+        <circle cx="45" cy="45" r="36" fill="none" stroke="#e0ddd8" stroke-width="10"/>
         <circle cx="45" cy="45" r="36" fill="none" stroke="#3b2fd0" stroke-width="10"
-          stroke-dasharray="226.2"
-          stroke-dashoffset="142.2"
-          stroke-linecap="round"
-          transform="rotate(-90 45 45)"/>
+          stroke-dasharray="226.2" stroke-dashoffset="142.2"
+          stroke-linecap="round" transform="rotate(-90 45 45)"/>
         <text x="45" y="42" text-anchor="middle" font-family="DM Mono" font-size="14" font-weight="600" fill="#1a1a24">37.1%</text>
         <text x="45" y="55" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#3a3a4a">of income</text>
       </svg>
-      <div class="coverage-detail">
-        <div class="coverage-row">
-          <span class="key">Total income</span>
-          <span class="money">$12,910</span>
-        </div>
-        <div class="coverage-row">
-          <span class="key">Min payments</span>
-          <span class="money neg">−$4,790</span>
-        </div>
-        <div class="coverage-row">
-          <span class="key">Total debt</span>
-          <span class="money">$143,454</span>
-        </div>
-        <div class="coverage-row">
-          <span class="key" style="font-weight:600; color: var(--text);">After bills</span>
-          <span class="money pos" style="font-weight:600; font-size: 15px;">+$8,120</span>
-        </div>
+      <div style="flex:1;">
+        <div class="cov-row"><span class="cov-key">Total income</span><span class="cov-val">$12,910</span></div>
+        <div class="cov-row"><span class="cov-key">Min payments</span><span class="cov-val neg">−$4,790</span></div>
+        <div class="cov-row"><span class="cov-key">Total debt</span><span class="cov-val">$143,454</span></div>
+        <div class="cov-row"><span class="cov-key" style="font-weight:600;color:var(--text);">After bills</span><span class="cov-val pos" style="font-size:15px;font-weight:600;">+$8,120</span></div>
       </div>
     </div>
   </div>
 
-  <!-- APR Chart -->
   <div class="card">
-    <div class="card-title"><i class="ti ti-flame" aria-hidden="true"></i> High-Interest Debt</div>
-    <div style="font-size: 12px; color: var(--text3); margin-bottom: 12px;">Avalanche method — attack highest APR first</div>
-    <div class="chart-wrap" style="position: relative; height: 220px;">
-      <canvas id="aprChart" role="img" aria-label="Bar chart showing APR by credit card, highest first">Capital One 1887 28.49%, Chase Freedom 27.49%, Chase Disney 26.49%, Capital One 4417 24.49%, Wells Fargo 23.49%, Citi Costco 22.74%.</canvas>
+    <div class="card-title"><i class="ti ti-flame" aria-hidden="true"></i> High-Interest Debt — APR %</div>
+    <div style="position:relative;height:200px;">
+      <canvas id="aprChart" role="img" aria-label="APR chart">Capital One 1887 28.49%, Chase Freedom 27.49%, Chase Disney 26.49%.</canvas>
     </div>
   </div>
 
-  <!-- Quick Stats -->
   <div class="card">
     <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Debt Snapshot</div>
     <div class="hero-grid">
-      <div class="metric">
-        <div class="label">Highest APR</div>
-        <div class="val red" style="font-size:20px;">28.49%</div>
-        <div class="sub">Cap One 1887</div>
-      </div>
-      <div class="metric">
-        <div class="label">Lowest APR</div>
-        <div class="val green" style="font-size:20px;">2.70%</div>
-        <div class="sub">Auto Loan</div>
-      </div>
-      <div class="metric">
-        <div class="label">Credit cards</div>
-        <div class="val" style="font-size:20px;">$32,627</div>
-        <div class="sub">high-APR cards</div>
-      </div>
-      <div class="metric">
-        <div class="label">Installment</div>
-        <div class="val" style="font-size:20px;">$101,550</div>
-        <div class="sub">mortgage + auto</div>
-      </div>
+      <div class="metric"><div class="label">Highest APR</div><div class="val red" style="font-size:20px;">28.49%</div><div class="sub">Cap One 1887</div></div>
+      <div class="metric"><div class="label">Lowest APR</div><div class="val green" style="font-size:20px;">2.70%</div><div class="sub">Auto Loan</div></div>
+      <div class="metric"><div class="label">Credit cards</div><div class="val" style="font-size:19px;">$32,627</div><div class="sub">high-APR only</div></div>
+      <div class="metric"><div class="label">Installment</div><div class="val" style="font-size:19px;">$101,550</div><div class="sub">mortgage + auto</div></div>
     </div>
   </div>
 
 </div>
 
-<!-- ═══════════════════════════════════
-     TAB 2: BILLS
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     BILLS
+══════════════════════════════ -->
 <div class="section" id="tab-bills">
+
   <div class="card">
     <div class="card-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> Bills Due — Next 60 Days</div>
 
-    <!-- URGENT (≤30 days) -->
-    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.7px; color: var(--red); margin-bottom: 8px; text-transform: uppercase;">⚡ Due Soon (≤30 days)</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.7px;color:var(--red);margin-bottom:8px;text-transform:uppercase;">⚡ Due Soon (≤30 days)</div>
+
+    <!-- BILL ITEM TEMPLATE:
+         udot color | icon bg/color | name | due text | min $ | bal | mark paid btn -->
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--red);"></div>
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-shield-heart" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-shield-heart" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Tehmina Life Insurance</div>
         <div class="bill-due">Due Jun 16 · 17 days</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$61</div>
-        <div class="bal">no balance</div>
+      <div class="bill-right">
+        <div class="bill-min">$61</div>
+        <div class="bill-bal">no balance</div>
+        <button class="mpbtn" onclick="openModal('Tehmina Life Insurance', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--amber);"></div>
-      <div class="bill-icon" style="background: rgba(251,191,36,0.1); color: var(--amber);"><i class="ti ti-parking" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--amber);"></div>
+      <div class="bill-icon" style="background:rgba(138,85,0,0.08);color:var(--amber);"><i class="ti ti-parking" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Parking Cash</div>
         <div class="bill-due">Due Jun 25 · 26 days</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$100</div>
-        <div class="bal">no balance</div>
+      <div class="bill-right">
+        <div class="bill-min">$100</div>
+        <div class="bill-bal">cash</div>
+        <button class="mpbtn" onclick="openModal('Parking Cash', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--amber);"></div>
-      <div class="bill-icon" style="background: rgba(251,191,36,0.1); color: var(--amber);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--amber);"></div>
+      <div class="bill-icon" style="background:rgba(138,85,0,0.08);color:var(--amber);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Citi Bank</div>
         <div class="bill-due">Due Jun 27 · 28 days</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$50</div>
-        <div class="bal">bal $2,887</div>
+      <div class="bill-right">
+        <div class="bill-min">$50</div>
+        <div class="bill-bal">bal $2,887</div>
+        <button class="mpbtn" onclick="openModal('Citi Bank', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--amber);"></div>
-      <div class="bill-icon" style="background: rgba(251,191,36,0.1); color: var(--amber);"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--amber);"></div>
+      <div class="bill-icon" style="background:rgba(138,85,0,0.08);color:var(--amber);"><i class="ti ti-bolt" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">ComEd</div>
         <div class="bill-due">Due Jun 27 · 28 days</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$113</div>
-        <div class="bal">utility</div>
+      <div class="bill-right">
+        <div class="bill-min">$113</div>
+        <div class="bill-bal">utility</div>
+        <button class="mpbtn" onclick="openModal('ComEd', this)">✓ Mark Paid</button>
       </div>
     </div>
 
-    <!-- UPCOMING -->
-    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.7px; color: var(--text3); margin: 18px 0 8px; text-transform: uppercase;">Upcoming (31–60 days)</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.7px;color:var(--text3);margin:16px 0 8px;text-transform:uppercase;">Upcoming (31–60 days)</div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">All State Auto Insurance</div>
         <div class="bill-due">Due Jun 30</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$252</div>
-        <div class="bal">insurance</div>
+      <div class="bill-right">
+        <div class="bill-min">$252</div>
+        <div class="bill-bal">insurance</div>
+        <button class="mpbtn" onclick="openModal('All State Auto Insurance', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-home" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-building-community" aria-hidden="true"></i></div>
       <div class="bill-info">
-        <div class="bill-name">Rent / Mortgage</div>
-        <div class="bill-due">Due Jul 1 · bal $91,481</div>
+        <div class="bill-name">Association</div>
+        <div class="bill-due">Due Jul 1</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$1,047</div>
-        <div class="bal">2.87% APR</div>
+      <div class="bill-right">
+        <div class="bill-min">$170</div>
+        <div class="bill-bal">HOA</div>
+        <button class="mpbtn" onclick="openModal('Association', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-heart" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Donation</div>
+        <div class="bill-due">Due Jul 1</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$100</div>
+        <div class="bill-bal">charity</div>
+        <button class="mpbtn" onclick="openModal('Donation', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Auto Loan</div>
-        <div class="bill-due">Due Jul 1 · bal $10,069</div>
+        <div class="bill-due">Due Jul 1 · bal $10,069 · 2.70%</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$469</div>
-        <div class="bal">2.70% APR</div>
+      <div class="bill-right">
+        <div class="bill-min">$469</div>
+        <div class="bill-bal">installment</div>
+        <button class="mpbtn" onclick="openModal('Auto Loan', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-receipt-tax" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-home" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Rent / Mortgage</div>
+        <div class="bill-due">Due Jul 1 · bal $91,481 · 2.87%</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$1,047</div>
+        <div class="bill-bal">mortgage</div>
+        <button class="mpbtn" onclick="openModal('Rent / Mortgage', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-receipt-tax" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Property Tax</div>
         <div class="bill-due">Due Jul 1</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$500</div>
-        <div class="bal">tax</div>
+      <div class="bill-right">
+        <div class="bill-min">$500</div>
+        <div class="bill-bal">tax</div>
+        <button class="mpbtn" onclick="openModal('Property Tax', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-wifi" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-wifi" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Comcast</div>
         <div class="bill-due">Due Jul 5</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$100</div>
-        <div class="bal">internet</div>
+      <div class="bill-right">
+        <div class="bill-min">$100</div>
+        <div class="bill-bal">internet</div>
+        <button class="mpbtn" onclick="openModal('Comcast', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-droplet" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-droplet" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Water</div>
         <div class="bill-due">Due Jul 6</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$197</div>
-        <div class="bal">utility</div>
+      <div class="bill-right">
+        <div class="bill-min">$197</div>
+        <div class="bill-bal">utility</div>
+        <button class="mpbtn" onclick="openModal('Water', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--red);"></div>
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">BOA</div>
+        <div class="bill-due">Due Jul 6 · bal $1,397</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$100</div>
+        <div class="bill-bal">credit card</div>
+        <button class="mpbtn" onclick="openModal('BOA', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Capital One 1887</div>
-        <div class="bill-due">Due Jul 6 · bal $3,086 · <span class="red">28.49%</span></div>
+        <div class="bill-due">Due Jul 6 · bal $3,086 · <span class="red">28.49% APR ⚡</span></div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$106</div>
-        <div class="bal">HIGH APR ⚡</div>
+      <div class="bill-right">
+        <div class="bill-min">$106</div>
+        <div class="bill-bal red">HIGH APR</div>
+        <button class="mpbtn" onclick="openModal('Capital One 1887', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-phone" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-phone" aria-hidden="true"></i></div>
       <div class="bill-info">
-        <div class="bill-name">AT&T</div>
+        <div class="bill-name">AT&amp;T</div>
         <div class="bill-due">Due Jul 7</div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$197</div>
-        <div class="bal">phone</div>
+      <div class="bill-right">
+        <div class="bill-min">$197</div>
+        <div class="bill-bal">phone</div>
+        <button class="mpbtn" onclick="openModal('AT&T', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--red);"></div>
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Capital One 4417</div>
-        <div class="bill-due">Due Jul 8 · bal $7,339 · <span class="red">24.49%</span></div>
+        <div class="bill-due">Due Jul 8 · bal $7,339 · <span class="red">24.49% APR</span></div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$73</div>
-        <div class="bal">HIGH APR</div>
+      <div class="bill-right">
+        <div class="bill-min">$73</div>
+        <div class="bill-bal red">HIGH APR</div>
+        <button class="mpbtn" onclick="openModal('Capital One 4417', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--red);"></div>
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Citi Costco</div>
+        <div class="bill-due">Due Jul 8 · bal $8,218 · <span class="red">22.74% APR</span></div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$355</div>
+        <div class="bill-bal red">HIGH APR</div>
+        <button class="mpbtn" onclick="openModal('Citi Costco', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Chase Freedom</div>
-        <div class="bill-due">Due Jul 10 · bal $7,485 · <span class="red">27.49%</span></div>
+        <div class="bill-due">Due Jul 10 · bal $7,485 · <span class="red">27.49% APR ⚡</span></div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$275</div>
-        <div class="bal">HIGH APR ⚡</div>
+      <div class="bill-right">
+        <div class="bill-min">$275</div>
+        <div class="bill-bal red">HIGH APR</div>
+        <button class="mpbtn" onclick="openModal('Chase Freedom', this)">✓ Mark Paid</button>
       </div>
     </div>
 
     <div class="bill-item">
-      <div class="urgency-dot" style="background: var(--text3);"></div>
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Wells Fargo</div>
+        <div class="bill-due">Due Jul 11 · bal $4,118 · 23.49%</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$68</div>
+        <div class="bill-bal">credit card</div>
+        <button class="mpbtn" onclick="openModal('Wells Fargo', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-shield-heart" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Inam Life Insurance</div>
+        <div class="bill-due">Due Jul 11</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$107</div>
+        <div class="bill-bal">insurance</div>
+        <button class="mpbtn" onclick="openModal('Inam Life Insurance', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-brand-paypal" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">PayPal</div>
+        <div class="bill-due">Due Jul 13 · bal $1,871</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$100</div>
+        <div class="bill-bal">credit</div>
+        <button class="mpbtn" onclick="openModal('PayPal', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--text3);"></div>
+      <div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-flame" aria-hidden="true"></i></div>
+      <div class="bill-info">
+        <div class="bill-name">Nicor Gas</div>
+        <div class="bill-due">Due Jul 16</div>
+      </div>
+      <div class="bill-right">
+        <div class="bill-min">$73</div>
+        <div class="bill-bal">utility</div>
+        <button class="mpbtn" onclick="openModal('Nicor Gas', this)">✓ Mark Paid</button>
+      </div>
+    </div>
+
+    <div class="bill-item">
+      <div class="udot" style="background:var(--red);"></div>
+      <div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
       <div class="bill-info">
         <div class="bill-name">Chase Disney</div>
-        <div class="bill-due">Due Jul 23 · bal $5,502 · <span class="red">26.49%</span></div>
+        <div class="bill-due">Due Jul 23 · bal $5,502 · <span class="red">26.49% APR</span></div>
       </div>
-      <div class="bill-amount">
-        <div class="min">$176</div>
-        <div class="bal">HIGH APR</div>
+      <div class="bill-right">
+        <div class="bill-min">$176</div>
+        <div class="bill-bal red">HIGH APR</div>
+        <button class="mpbtn" onclick="openModal('Chase Disney', this)">✓ Mark Paid</button>
       </div>
     </div>
 
   </div>
 
-  <!-- Total row -->
-  <div class="card" style="background: var(--bg3);">
-    <div style="display:flex; justify-content: space-between; align-items: center;">
+  <div class="card" style="background:var(--bg3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div style="font-size: 13px; color: var(--text2);">Total minimum payments</div>
-        <div style="font-size: 11px; color: var(--text3); margin-top: 2px;">All 23 bills combined</div>
+        <div style="font-size:13px;color:var(--text2);">Total minimum payments</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">23 bills combined</div>
       </div>
-      <div style="font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 600; color: var(--red);">$4,790</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--red);">$4,790</div>
     </div>
   </div>
+
 </div>
 
-<!-- ═══════════════════════════════════
-     TAB 3: PAYOFF STRATEGY
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     PAYOFF
+══════════════════════════════ -->
 <div class="section" id="tab-payoff">
 
-  <div class="plan-note">
-    <strong>Avalanche Method Active</strong> — Attack the highest interest rate first. Pay minimums on everything else, throw every extra dollar at Priority 1 cards.
-  </div>
+  <div class="plan-note"><strong>Avalanche Method Active</strong> — Pay minimums on everything. Throw every extra dollar at the highest APR first.</div>
 
   <div class="card">
     <div class="card-title"><i class="ti ti-flame" aria-hidden="true"></i> Priority Order</div>
 
     <div class="payoff-item">
-      <span class="priority-badge p1">⚡ P1</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Capital One 1887</div>
-        <div class="payoff-meta">APR: <strong>28.49%</strong> · 29 mo est. · Pay FIRST</div>
+      <span class="pbadge p1">⚡ P1</span>
+      <div style="flex:1;">
+        <div class="pname">Capital One 1887</div>
+        <div class="pmeta">APR: <strong>28.49%</strong> · 29 mo est. · Pay FIRST</div>
       </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$3,086</div>
-        <div class="payoff-interest red">+$2,125 interest</div>
-      </div>
-    </div>
-
-    <div class="payoff-item">
-      <span class="priority-badge p1">⚡ P1</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Chase Freedom</div>
-        <div class="payoff-meta">APR: <strong>27.49%</strong> · 27 mo est.</div>
-      </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$7,485</div>
-        <div class="payoff-interest red">+$4,629 interest</div>
+      <div style="text-align:right;">
+        <div class="pbal">$3,086</div>
+        <div class="pint red">+$2,125 interest</div>
       </div>
     </div>
 
     <div class="payoff-item">
-      <span class="priority-badge p1">⚡ P1</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Chase Disney</div>
-        <div class="payoff-meta">APR: <strong>26.49%</strong> · 31 mo est.</div>
+      <span class="pbadge p1">⚡ P1</span>
+      <div style="flex:1;">
+        <div class="pname">Chase Freedom</div>
+        <div class="pmeta">APR: <strong>27.49%</strong> · 27 mo est.</div>
       </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$5,502</div>
-        <div class="payoff-interest red">+$3,765 interest</div>
-      </div>
-    </div>
-
-    <div class="payoff-item">
-      <span class="priority-badge p2">P2</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Capital One 4417</div>
-        <div class="payoff-meta">APR: 24.49% · 101 mo est.</div>
-      </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$7,339</div>
-        <div class="payoff-interest amber">+$15,128 interest</div>
+      <div style="text-align:right;">
+        <div class="pbal">$7,485</div>
+        <div class="pint red">+$4,629 interest</div>
       </div>
     </div>
 
     <div class="payoff-item">
-      <span class="priority-badge p2">P2</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Wells Fargo</div>
-        <div class="payoff-meta">APR: 23.49% · 61 mo est.</div>
+      <span class="pbadge p1">⚡ P1</span>
+      <div style="flex:1;">
+        <div class="pname">Chase Disney</div>
+        <div class="pmeta">APR: <strong>26.49%</strong> · 31 mo est.</div>
       </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$4,118</div>
-        <div class="payoff-interest amber">+$4,918 interest</div>
-      </div>
-    </div>
-
-    <div class="payoff-item">
-      <span class="priority-badge p3">P3</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Citi Costco</div>
-        <div class="payoff-meta">APR: 22.74% · 23 mo est.</div>
-      </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$8,218</div>
-        <div class="payoff-interest" style="color: var(--blue);">+$3,582 interest</div>
+      <div style="text-align:right;">
+        <div class="pbal">$5,502</div>
+        <div class="pint red">+$3,765 interest</div>
       </div>
     </div>
 
     <div class="payoff-item">
-      <span class="priority-badge p-min">min</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Auto Loan</div>
-        <div class="payoff-meta">APR: 2.70% — low priority</div>
+      <span class="pbadge p2">P2</span>
+      <div style="flex:1;">
+        <div class="pname">Capital One 4417</div>
+        <div class="pmeta">APR: 24.49% · 101 mo if min only</div>
       </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$10,069</div>
-        <div class="payoff-interest">+$476 interest</div>
+      <div style="text-align:right;">
+        <div class="pbal">$7,339</div>
+        <div class="pint amber">+$15,128 interest ⚠</div>
       </div>
     </div>
 
     <div class="payoff-item">
-      <span class="priority-badge p-min">min</span>
-      <div class="payoff-body">
-        <div class="payoff-name">Mortgage</div>
-        <div class="payoff-meta">APR: 2.87% — lowest priority</div>
+      <span class="pbadge p2">P2</span>
+      <div style="flex:1;">
+        <div class="pname">Wells Fargo</div>
+        <div class="pmeta">APR: 23.49% · 61 mo est.</div>
       </div>
-      <div class="payoff-right">
-        <div class="payoff-bal">$91,481</div>
-        <div class="payoff-interest">+$19,035 interest</div>
+      <div style="text-align:right;">
+        <div class="pbal">$4,118</div>
+        <div class="pint amber">+$4,918 interest</div>
+      </div>
+    </div>
+
+    <div class="payoff-item">
+      <span class="pbadge p3">P3</span>
+      <div style="flex:1;">
+        <div class="pname">Citi Costco</div>
+        <div class="pmeta">APR: 22.74% · 23 mo est.</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="pbal">$8,218</div>
+        <div class="pint blue">+$3,582 interest</div>
+      </div>
+    </div>
+
+    <div class="payoff-item">
+      <span class="pbadge pmin">min</span>
+      <div style="flex:1;">
+        <div class="pname">Auto Loan</div>
+        <div class="pmeta">APR: 2.70% — pay minimum only</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="pbal">$10,069</div>
+        <div class="pint">+$476 interest</div>
+      </div>
+    </div>
+
+    <div class="payoff-item">
+      <span class="pbadge pmin">min</span>
+      <div style="flex:1;">
+        <div class="pname">Mortgage</div>
+        <div class="pmeta">APR: 2.87% — pay minimum only</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="pbal">$91,481</div>
+        <div class="pint">+$19,035 interest</div>
       </div>
     </div>
 
   </div>
 
-  <!-- Progress bars -->
   <div class="card">
     <div class="card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Payoff Progress</div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Capital One 1887</span>
-        <span class="pct red">28.49%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 100%; background: var(--red);"></div>
-      </div>
-      <div class="prog-sub">$3,086 remaining — pay minimum + all extra</div>
-    </div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Chase Freedom</span>
-        <span class="pct red">27.49%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 93%; background: var(--red);"></div>
-      </div>
-      <div class="prog-sub">$7,485 remaining</div>
-    </div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Chase Disney</span>
-        <span class="pct red">26.49%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 90%; background: #f97316;"></div>
-      </div>
-      <div class="prog-sub">$5,502 remaining</div>
-    </div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Cap One 4417</span>
-        <span class="pct amber">24.49%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 83%; background: var(--amber);"></div>
-      </div>
-      <div class="prog-sub">$7,339 remaining — ⚠ only paying minimum!</div>
-    </div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Wells Fargo</span>
-        <span class="pct amber">23.49%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 80%; background: var(--amber);"></div>
-      </div>
-      <div class="prog-sub">$4,118 remaining</div>
-    </div>
-
-    <div class="prog-bar">
-      <div class="prog-label">
-        <span class="name">Citi Costco</span>
-        <span class="pct" style="color: var(--blue);">22.74%</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width: 76%; background: var(--blue);"></div>
-      </div>
-      <div class="prog-sub">$8,218 remaining — pay minimums only</div>
-    </div>
-
+    <div class="prog"><div class="prog-lbl"><span>Capital One 1887</span><span class="prog-pct red">28.49%</span></div><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--red);"></div></div><div class="prog-sub">$3,086 — send all extra here first</div></div>
+    <div class="prog"><div class="prog-lbl"><span>Chase Freedom</span><span class="prog-pct red">27.49%</span></div><div class="prog-track"><div class="prog-fill" style="width:93%;background:var(--red);"></div></div><div class="prog-sub">$7,485 remaining</div></div>
+    <div class="prog"><div class="prog-lbl"><span>Chase Disney</span><span class="prog-pct red">26.49%</span></div><div class="prog-track"><div class="prog-fill" style="width:89%;background:#c45a1a;"></div></div><div class="prog-sub">$5,502 remaining</div></div>
+    <div class="prog"><div class="prog-lbl"><span>Cap One 4417</span><span class="prog-pct amber">24.49%</span></div><div class="prog-track"><div class="prog-fill" style="width:83%;background:var(--amber);"></div></div><div class="prog-sub">$7,339 — ⚠ minimum only adds $15K interest</div></div>
+    <div class="prog"><div class="prog-lbl"><span>Wells Fargo</span><span class="prog-pct amber">23.49%</span></div><div class="prog-track"><div class="prog-fill" style="width:79%;background:var(--amber);"></div></div><div class="prog-sub">$4,118 remaining</div></div>
+    <div class="prog"><div class="prog-lbl"><span>Citi Costco</span><span class="prog-pct blue">22.74%</span></div><div class="prog-track"><div class="prog-fill" style="width:75%;background:var(--blue);"></div></div><div class="prog-sub">$8,218 — pay minimums only for now</div></div>
   </div>
 
 </div>
 
-<!-- ═══════════════════════════════════
-     TAB 4: PAYCHECK SCHEDULE
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     SCHEDULE
+══════════════════════════════ -->
 <div class="section" id="tab-schedule">
-
   <div class="card">
     <div class="card-title"><i class="ti ti-calendar-dollar" aria-hidden="true"></i> Upcoming Paychecks</div>
-
-    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-      <div style="flex:1; background: rgba(124,110,245,0.1); border: 0.5px solid rgba(124,110,245,0.2); border-radius: var(--radius-sm); padding: 10px 12px;">
-        <div style="font-size: 11px; color: var(--accent2); margin-bottom: 3px;">Muhammad / check</div>
-        <div style="font-family: 'DM Mono'; font-size: 17px; font-weight: 600;">$3,047</div>
-        <div style="font-size: 11px; color: var(--text3);">bi-weekly</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;background:rgba(59,47,208,0.06);border:0.5px solid rgba(59,47,208,0.2);border-radius:var(--rsm);padding:12px;">
+        <div style="font-size:11px;color:var(--accent);margin-bottom:3px;">Muhammad / check</div>
+        <div style="font-family:'DM Mono';font-size:18px;font-weight:600;color:var(--text);">$3,047</div>
+        <div style="font-size:11px;color:var(--text3);">bi-weekly</div>
       </div>
-      <div style="flex:1; background: rgba(62,207,142,0.08); border: 0.5px solid rgba(62,207,142,0.2); border-radius: var(--radius-sm); padding: 10px 12px;">
-        <div style="font-size: 11px; color: var(--green); margin-bottom: 3px;">Wife / check</div>
-        <div style="font-family: 'DM Mono'; font-size: 17px; font-weight: 600;">$2,000</div>
-        <div style="font-size: 11px; color: var(--text3);">bi-weekly</div>
+      <div style="flex:1;background:rgba(10,122,74,0.06);border:0.5px solid rgba(10,122,74,0.2);border-radius:var(--rsm);padding:12px;">
+        <div style="font-size:11px;color:var(--green);margin-bottom:3px;">Wife / check</div>
+        <div style="font-family:'DM Mono';font-size:18px;font-weight:600;color:var(--text);">$2,000</div>
+        <div style="font-size:11px;color:var(--text3);">bi-weekly</div>
       </div>
     </div>
-
-    <!-- Schedule list -->
-    <div class="sched-row" style="font-size: 11px; color: var(--text3); padding-bottom: 8px; margin-bottom: 2px; border-bottom: 0.5px solid var(--border);">
-      <div style="width:8px;"></div>
-      <div style="width:80px;">DATE</div>
-      <div style="flex:1;">EARNER</div>
-      <div>AMOUNT</div>
+    <div class="sched-row" style="font-size:11px;color:var(--text3);padding-bottom:6px;border-bottom:0.5px solid var(--border);">
+      <div style="width:8px;"></div><div style="width:76px;">DATE</div><div style="flex:1;">EARNER</div><div>AMOUNT</div>
     </div>
-
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Jun 1</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Jun 5</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Jun 15</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Jun 19</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Jun 29</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Jul 3</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Jul 13</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Jul 17</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Jul 27</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Jul 31</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Aug 10</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Aug 14</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--accent);"></div>
-      <div class="sched-date">Aug 24</div>
-      <div class="sched-who">Muhammad</div>
-      <div class="sched-amount" style="color: var(--accent2);">$3,047</div>
-    </div>
-    <div class="sched-row">
-      <div class="sched-dot" style="background: var(--green);"></div>
-      <div class="sched-date">Aug 28</div>
-      <div class="sched-who">Wife</div>
-      <div class="sched-amount" style="color: var(--green);">$2,000</div>
-    </div>
-
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Jun 1</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Jun 5</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Jun 15</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Jun 19</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Jun 29</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Jul 3</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Jul 13</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Jul 17</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Jul 27</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Jul 31</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Aug 10</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Aug 14</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--accent);"></div><div class="sdate">Aug 24</div><div class="swho">Muhammad</div><div class="samt" style="color:var(--accent);">$3,047</div></div>
+    <div class="sched-row"><div class="sdot" style="background:var(--green);"></div><div class="sdate">Aug 28</div><div class="swho">Wife</div><div class="samt" style="color:var(--green);">$2,000</div></div>
   </div>
-
 </div>
 
-<!-- ═══════════════════════════════════
-     TAB 5: SMART PLAN
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     SMART PLAN
+══════════════════════════════ -->
 <div class="section" id="tab-plan">
-
-  <div class="plan-note">
-    <i class="ti ti-bulb" aria-hidden="true"></i>
-    <strong> Smart Assignment:</strong> Urgent bills (due soonest) are paid from the next incoming check. High-APR cards always get extra payment first.
-  </div>
-
+  <div class="plan-note"><i class="ti ti-bulb" aria-hidden="true"></i> <strong>Smart Assignment:</strong> Urgent bills are paid from the next incoming check. High-APR cards always get extra first.</div>
   <div class="card">
     <div class="card-title"><i class="ti ti-player-play" aria-hidden="true"></i> Jun 1 Paycheck — Muhammad ($3,047)</div>
-
-    <div class="bill-item">
-      <div class="bill-icon" style="background: rgba(248,113,113,0.1); color: var(--red);"><i class="ti ti-shield-heart" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">Tehmina Life Insurance</div><div class="bill-due">Due Jun 16 — pay now</div></div>
-      <div class="bill-amount"><div class="min">$61</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-parking" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">Parking Cash</div><div class="bill-due">Due Jun 25</div></div>
-      <div class="bill-amount"><div class="min">$100</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">Citi Bank</div><div class="bill-due">Due Jun 27</div></div>
-      <div class="bill-amount"><div class="min">$50</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-bolt" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">ComEd</div><div class="bill-due">Due Jun 27</div></div>
-      <div class="bill-amount"><div class="min">$113</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">All State Auto Insurance</div><div class="bill-due">Due Jun 30</div></div>
-      <div class="bill-amount"><div class="min">$252</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-home" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">Rent / Mortgage</div><div class="bill-due">Due Jul 1</div></div>
-      <div class="bill-amount"><div class="min">$1,047</div></div>
-    </div>
-    <div class="bill-item">
-      <div class="bill-icon" style="background: var(--bg3); color: var(--text2);"><i class="ti ti-receipt-tax" aria-hidden="true"></i></div>
-      <div class="bill-info"><div class="bill-name">Property Tax</div><div class="bill-due">Due Jul 1</div></div>
-      <div class="bill-amount"><div class="min">$500</div></div>
-    </div>
-
-    <div style="margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; color: var(--text2);">Check total</span>
-      <span style="font-family: 'DM Mono'; font-size: 16px; font-weight: 600;">$3,047</span>
-    </div>
-    <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; color: var(--text2);">Bills assigned</span>
-      <span style="font-family: 'DM Mono'; font-size: 15px; color: var(--red);">−$2,123</span>
-    </div>
-    <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; font-weight: 600;">Remaining</span>
-      <span style="font-family: 'DM Mono'; font-size: 18px; font-weight: 600; color: var(--green);">+$924</span>
-    </div>
-    <div style="margin-top: 8px; background: rgba(248,113,113,0.08); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--red);">
-      ⚡ Send $924 extra to Capital One 1887 (28.49% APR) — your highest-cost debt.
+    <div class="bill-item"><div class="bill-icon" style="background:rgba(181,42,42,0.08);color:var(--red);"><i class="ti ti-shield-heart" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">Tehmina Life Insurance</div><div class="bill-due">Due Jun 16 — pay now</div></div><div class="bill-right"><div class="bill-min">$61</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-parking" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">Parking Cash</div><div class="bill-due">Due Jun 25</div></div><div class="bill-right"><div class="bill-min">$100</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-credit-card" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">Citi Bank</div><div class="bill-due">Due Jun 27</div></div><div class="bill-right"><div class="bill-min">$50</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-bolt" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">ComEd</div><div class="bill-due">Due Jun 27</div></div><div class="bill-right"><div class="bill-min">$113</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-car" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">All State Auto</div><div class="bill-due">Due Jun 30</div></div><div class="bill-right"><div class="bill-min">$252</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-home" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">Rent / Mortgage</div><div class="bill-due">Due Jul 1</div></div><div class="bill-right"><div class="bill-min">$1,047</div></div></div>
+    <div class="bill-item"><div class="bill-icon" style="background:var(--bg3);color:var(--text2);"><i class="ti ti-receipt-tax" aria-hidden="true"></i></div><div class="bill-info"><div class="bill-name">Property Tax</div><div class="bill-due">Due Jul 1</div></div><div class="bill-right"><div class="bill-min">$500</div></div></div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:13px;color:var(--text2);">Bills assigned</span><span style="font-family:'DM Mono';font-size:14px;color:var(--red);">−$2,123</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;">Remaining</span><span style="font-family:'DM Mono';font-size:18px;font-weight:600;color:var(--green);">+$924</span></div>
+      <div style="background:rgba(181,42,42,0.06);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--red);">⚡ Send $924 extra to Capital One 1887 — your 28.49% APR debt.</div>
     </div>
   </div>
-
-  <!-- Tips section -->
-  <div class="tip-box">
-    <h4>📌 Donation & Association</h4>
-    <p>These two bills ($100 + $170) are due Jul 1 but are not in the Jun 1 paycheck plan above — assign them to the <strong>Jun 15 Muhammad check</strong> or <strong>Jun 19 Wife check</strong>.</p>
-  </div>
-
-  <div class="tip-box">
-    <h4>💡 Auto Loan & Mortgage</h4>
-    <p>Both are low-APR (2.7% / 2.87%). Pay minimums only. Every spare dollar goes to Capital One 1887 first — you're paying 10× more in interest there.</p>
-  </div>
-
-  <div class="tip-box">
-    <h4>⚠ Capital One 4417 Warning</h4>
-    <p>At 24.49% APR with a minimum of only $73, the 101-month estimate means you'll pay $15,128 in interest on a $7,339 balance. After eliminating Cap One 1887, redirect that payment here immediately.</p>
-  </div>
-
+  <div class="tip-box"><h4>📌 Donation & Association</h4><p>$100 + $170 due Jul 1 — assign to the Jun 15 Muhammad check or Jun 19 Wife check.</p></div>
+  <div class="tip-box"><h4>💡 Auto Loan & Mortgage</h4><p>Both are low-APR (2.7% / 2.87%). Pay minimums only — every spare dollar fights Capital One 1887 first.</p></div>
+  <div class="tip-box"><h4>⚠ Capital One 4417 Warning</h4><p>At 24.49% APR with only a $73 minimum, you'll pay $15,128 in interest on $7,339. After Cap One 1887 is gone, redirect that full payment here.</p></div>
 </div>
 
-
-<!-- ═══════════════════════════════════
-     TAB 6: PAYMENT HISTORY
-═══════════════════════════════════ -->
+<!-- ══════════════════════════════
+     HISTORY
+══════════════════════════════ -->
 <div class="section" id="tab-history">
+  <div class="card" id="histSummaryCard" style="display:none;background:rgba(10,122,74,0.05);border-color:rgba(10,122,74,0.2);">
+    <div class="card-title" style="color:var(--green);"><i class="ti ti-circle-check" aria-hidden="true"></i> Payments Recorded</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:13px;color:var(--text2);">Total paid this session</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;" id="histCount">0 payments</div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:var(--green);" id="histTotal">$0.00</div>
+    </div>
+  </div>
   <div class="card">
-    <div class="card-title"><i class="ti ti-history" aria-hidden="true"></i> Payment History</div>
-    <div id="histEmpty" style="text-align:center; padding:30px 0; color:#9999b0; font-size:13px;">
-      <i class="ti ti-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>
-      No payments recorded yet.<br>Tap <strong>✓ Mark Paid</strong> on any bill to log it here.
+    <div class="card-title"><i class="ti ti-history" aria-hidden="true"></i> Payment Log</div>
+    <div id="histEmpty" style="text-align:center;padding:28px 0;color:var(--text3);font-size:13px;">
+      <i class="ti ti-inbox" style="font-size:32px;display:block;margin-bottom:8px;color:var(--text3);"></i>
+      No payments recorded yet.<br>Tap <strong style="color:var(--text2);">✓ Mark Paid</strong> on any bill to log it here.
     </div>
     <div id="histList"></div>
   </div>
-  <div class="card" id="histSummaryCard" style="display:none; background:#f0fdf7; border-color: rgba(10,122,74,0.2);">
-    <div class="card-title" style="color:#0a7a4a;"><i class="ti ti-circle-check" aria-hidden="true"></i> This Month Summary</div>
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div style="font-size:13px; color:#3a3a4a;">Total paid</div>
-        <div style="font-size:11px; color:#5a5a6e; margin-top:2px;" id="histCount">0 payments</div>
-      </div>
-      <div style="font-family:'DM Mono',monospace; font-size:22px; font-weight:600; color:#0a7a4a;" id="histTotal">$0</div>
-    </div>
-  </div>
 </div>
 
-<!-- MARK PAID MODAL -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalBackdrop(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modalBillName">Mark as Paid</div>
-    <div class="modal-sub" id="modalBillSub">Enter payment details below</div>
-    <div class="modal-field">
-      <label class="modal-label" for="modalDate">Date Paid</label>
-      <input class="modal-input" type="date" id="modalDate"/>
+<!-- ══════════════════════════════
+     MARK PAID MODAL
+══════════════════════════════ -->
+<div class="modal-bd" id="modalBd">
+  <div class="modal" id="modalBox">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="mTitle">Mark as Paid</div>
+    <div class="msub">Enter the date and amount you paid</div>
+
+    <div class="mfield">
+      <label class="mlabel" for="mDate">Date Paid</label>
+      <input class="minput" type="date" id="mDate"/>
     </div>
-    <div class="modal-field">
-      <label class="modal-label" for="modalAmount">Amount Paid ($)</label>
-      <input class="modal-input" type="number" id="modalAmount" placeholder="0.00" step="0.01" min="0"/>
+
+    <div class="mfield">
+      <label class="mlabel" for="mAmount">Amount Paid ($)</label>
+      <input class="minput" type="number" id="mAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal"/>
     </div>
-    <div class="modal-field">
-      <label class="modal-label" for="modalNote">Note (optional)</label>
-      <input class="modal-input" type="text" id="modalNote" placeholder="e.g. paid online, autopay, etc."/>
+
+    <div class="mfield">
+      <label class="mlabel" for="mPrevPayments">Previous Payments (optional)</label>
+      <input class="minput" type="text" id="mPrevPayments" placeholder="e.g. paid $50 on May 15"/>
     </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="savePaid()">Save Payment</button>
+
+    <div class="mfield">
+      <label class="mlabel" for="mNote">Note (optional)</label>
+      <input class="minput" type="text" id="mNote" placeholder="e.g. autopay, paid online, partial"/>
+    </div>
+
+    <div class="mactions">
+      <button class="mbtn-cancel" id="mCancelBtn">Cancel</button>
+      <button class="mbtn-save" id="mSaveBtn">Save Payment</button>
     </div>
   </div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav" aria-label="Main navigation">
-  <button class="nav-btn active" data-tab="dashboard">
-    <i class="ti ti-home" aria-hidden="true"></i>Home
-  </button>
-  <button class="nav-btn" data-tab="bills">
-    <i class="ti ti-receipt" aria-hidden="true"></i>Bills
-  </button>
-  <button class="nav-btn" data-tab="payoff">
-    <i class="ti ti-flame" aria-hidden="true"></i>Payoff
-  </button>
-  <button class="nav-btn" data-tab="schedule">
-    <i class="ti ti-calendar" aria-hidden="true"></i>Schedule
-  </button>
-  <button class="nav-btn" data-tab="plan">
-    <i class="ti ti-bulb" aria-hidden="true"></i>Plan
-  </button>
-  <button class="nav-btn" data-tab="history">
-    <i class="ti ti-history" aria-hidden="true"></i>History
-  </button>
+  <button class="nav-btn active" data-tab="dashboard"><i class="ti ti-home" aria-hidden="true"></i>Home</button>
+  <button class="nav-btn" data-tab="bills"><i class="ti ti-receipt" aria-hidden="true"></i>Bills</button>
+  <button class="nav-btn" data-tab="payoff"><i class="ti ti-flame" aria-hidden="true"></i>Payoff</button>
+  <button class="nav-btn" data-tab="schedule"><i class="ti ti-calendar" aria-hidden="true"></i>Schedule</button>
+  <button class="nav-btn" data-tab="plan"><i class="ti ti-bulb" aria-hidden="true"></i>Plan</button>
+  <button class="nav-btn" data-tab="history"><i class="ti ti-history" aria-hidden="true"></i>History</button>
 </nav>
 
 <script>
-  // Date
-  const d = new Date();
-  document.getElementById('todayDate').textContent = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+// ── DATE ──
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
-  // Tab switching
-  function switchTab(name) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    document.querySelectorAll('[data-tab="' + name + '"]').forEach(el => el.classList.add('active'));
-  }
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab, .nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('[data-tab="' + name + '"]').forEach(el => el.classList.add('active'));
+}
+document.querySelectorAll('[data-tab]').forEach(el => {
+  el.addEventListener('click', () => switchTab(el.dataset.tab));
+});
 
-  document.querySelectorAll('[data-tab]').forEach(el => {
-    el.addEventListener('click', () => switchTab(el.dataset.tab));
-  });
-
-  // APR Chart
-  const ctx = document.getElementById('aprChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Cap One\n1887', 'Chase\nFreedom', 'Chase\nDisney', 'Cap One\n4417', 'Wells\nFargo', 'Citi\nCostco'],
-      datasets: [{
-        label: 'APR %',
-        data: [28.49, 27.49, 26.49, 24.49, 23.49, 22.74],
-        backgroundColor: ['#f87171','#f97316','#fb923c','#fbbf24','#a78bfa','#60a5fa'],
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
+// ── APR CHART ──
+new Chart(document.getElementById('aprChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: ['Cap One 1887','Chase Freedom','Chase Disney','Cap One 4417','Wells Fargo','Citi Costco'],
+    datasets: [{
+      data: [28.49, 27.49, 26.49, 24.49, 23.49, 22.74],
+      backgroundColor: ['#b52a2a','#c45a1a','#c47a1a','#8a5500','#1a4fc4','#1a6a4a'],
+      borderRadius: 6, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: c => c.parsed.y.toFixed(2) + '% APR' } }
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.parsed.y.toFixed(2) + '% APR' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#3a3a4a', font: { size: 10 }, autoSkip: false },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          border: { color: 'rgba(0,0,0,0.08)' }
-        },
-        y: {
-          min: 20,
-          max: 30,
-          ticks: { color: '#3a3a4a', font: { size: 10 }, callback: v => v + '%' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          border: { color: 'rgba(0,0,0,0.08)' }
-        }
-      }
+    scales: {
+      x: { ticks: { color: '#3a3a4a', font: { size: 10 }, autoSkip: false, maxRotation: 30 }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { color: 'rgba(0,0,0,0.08)' } },
+      y: { min: 20, max: 30, ticks: { color: '#3a3a4a', font: { size: 10 }, callback: v => v + '%' }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { color: 'rgba(0,0,0,0.08)' } }
     }
-  });
+  }
+});
 
-  // ── MARK PAID MODAL ──
-  let currentModalBill = '';
-  let currentModalBtnId = '';
-  const payments = [];
+// ── MODAL & PAYMENTS ──
+const payments = [];
+let activeBillName = '';
+let activeBtn = null;
 
-  function openModal(billName, btnId) {
-    currentModalBill = billName;
-    currentModalBtnId = btnId || '';
-    document.getElementById('modalBillName').textContent = billName;
-    document.getElementById('modalBillSub').textContent = 'Enter payment details for this bill';
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('modalDate').value = today;
-    document.getElementById('modalAmount').value = '';
-    document.getElementById('modalNote').value = '';
-    document.getElementById('modalBackdrop').classList.add('open');
+const modalBd   = document.getElementById('modalBd');
+const mTitle    = document.getElementById('mTitle');
+const mDate     = document.getElementById('mDate');
+const mAmount   = document.getElementById('mAmount');
+const mPrev     = document.getElementById('mPrevPayments');
+const mNote     = document.getElementById('mNote');
+
+function openModal(billName, btn) {
+  activeBillName = billName;
+  activeBtn = btn;
+  mTitle.textContent = billName;
+  mDate.value = new Date().toISOString().split('T')[0];
+  mAmount.value = '';
+  mPrev.value = '';
+  mNote.value = '';
+  modalBd.classList.add('open');
+  setTimeout(() => mAmount.focus(), 300);
+}
+
+function closeModal() {
+  modalBd.classList.remove('open');
+}
+
+// Close on backdrop tap
+modalBd.addEventListener('click', function(e) {
+  if (e.target === modalBd) closeModal();
+});
+
+document.getElementById('mCancelBtn').addEventListener('click', closeModal);
+
+document.getElementById('mSaveBtn').addEventListener('click', function() {
+  const date   = mDate.value;
+  const amount = parseFloat(mAmount.value);
+  const prev   = mPrev.value.trim();
+  const note   = mNote.value.trim();
+
+  if (!date)         { alert('Please enter the date paid.'); mDate.focus(); return; }
+  if (!amount || amount <= 0) { alert('Please enter a valid amount.'); mAmount.focus(); return; }
+
+  payments.unshift({ bill: activeBillName, date, amount, prev, note });
+
+  // Update the button
+  if (activeBtn) {
+    activeBtn.textContent = '✓ Paid';
+    activeBtn.classList.add('paid');
   }
 
-  function closeModal() {
-    document.getElementById('modalBackdrop').classList.remove('open');
+  renderHistory();
+  closeModal();
+});
+
+function renderHistory() {
+  const list      = document.getElementById('histList');
+  const empty     = document.getElementById('histEmpty');
+  const summCard  = document.getElementById('histSummaryCard');
+  const histTotal = document.getElementById('histTotal');
+  const histCount = document.getElementById('histCount');
+
+  if (payments.length === 0) {
+    empty.style.display = 'block';
+    list.innerHTML = '';
+    summCard.style.display = 'none';
+    return;
   }
 
-  function closeModalBackdrop(e) {
-    if (e.target === document.getElementById('modalBackdrop')) closeModal();
-  }
+  empty.style.display = 'none';
+  summCard.style.display = 'block';
 
-  function savePaid() {
-    const date = document.getElementById('modalDate').value;
-    const amount = parseFloat(document.getElementById('modalAmount').value) || 0;
-    const note = document.getElementById('modalNote').value.trim();
+  const total = payments.reduce((s, p) => s + p.amount, 0);
+  histTotal.textContent = '$' + total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  histCount.textContent = payments.length + ' payment' + (payments.length !== 1 ? 's' : '');
 
-    if (!date) { alert('Please enter the date paid.'); return; }
-    if (amount <= 0) { alert('Please enter the amount paid.'); return; }
-
-    const entry = { bill: currentModalBill, date, amount, note };
-    payments.unshift(entry);
-    renderHistory();
-
-    // Mark the button as paid
-    const btns = document.querySelectorAll('.mark-paid-btn');
-    btns.forEach(b => {
-      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(currentModalBill.replace(/'/g, "\'"))) {
-        b.textContent = '✓ Paid';
-        b.classList.add('paid');
-      }
-    });
-
-    closeModal();
-  }
-
-  function renderHistory() {
-    const list = document.getElementById('histList');
-    const empty = document.getElementById('histEmpty');
-    const summCard = document.getElementById('histSummaryCard');
-    const histTotal = document.getElementById('histTotal');
-    const histCount = document.getElementById('histCount');
-
-    if (payments.length === 0) {
-      empty.style.display = 'block';
-      list.innerHTML = '';
-      summCard.style.display = 'none';
-      return;
-    }
-
-    empty.style.display = 'none';
-    summCard.style.display = 'block';
-
-    const total = payments.reduce((s, p) => s + p.amount, 0);
-    histTotal.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    histCount.textContent = payments.length + ' payment' + (payments.length !== 1 ? 's' : '');
-
-    list.innerHTML = payments.map(p => {
-      const d = new Date(p.date + 'T00:00:00');
-      const dStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-      return `<div class="hist-item">
-        <div class="hist-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
-        <div style="flex:1; min-width:0;">
-          <div class="hist-name">${p.bill}</div>
-          <div class="hist-date">${dStr}${p.note ? ' · ' + p.note : ''}</div>
-        </div>
-        <div class="hist-amount">$${p.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-      </div>`;
-    }).join('');
-  }
-
+  list.innerHTML = payments.map(p => {
+    const dStr = new Date(p.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const meta = [dStr, p.prev ? 'Prev: ' + p.prev : '', p.note].filter(Boolean).join(' · ');
+    return `<div class="hist-item">
+      <div class="hicon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0;">
+        <div class="hname">${p.bill}</div>
+        <div class="hdate">${meta}</div>
+      </div>
+      <div class="hamount">$${p.amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
